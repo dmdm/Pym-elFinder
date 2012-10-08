@@ -1,0 +1,7 @@
+_=1349689989647
+answer=42
+cmd=rm
+targets[]=l1_c29tZV9kaXIvZm9vMg
+targets[]=l1_c29tZV9kaXIvZm9vMQ
+
+{"removed":["l1_c29tZV9kaXIvZm9vMg","l1_c29tZV9kaXIvZm9vMQ"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.036159038543701,"memory":"1719Kb \/ 1591Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}

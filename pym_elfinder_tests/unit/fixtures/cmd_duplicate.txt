@@ -1,0 +1,6 @@
+_=1349690554623
+answer=42
+cmd=duplicate
+targets[]=l1_c29tZV9kaXIvZGVlcGVyMi50eHQ
+
+{"added":[{"mime":"text\/plain","ts":1349690554,"read":1,"write":1,"size":62,"hash":"l1_c29tZV9kaXIvZGVlcGVyMiBjb3B5IDEudHh0","name":"deeper2 copy 1.txt","phash":"l1_c29tZV9kaXI"}],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.048813104629517,"memory":"1719Kb \/ 1591Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}

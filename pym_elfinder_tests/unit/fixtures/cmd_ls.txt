@@ -1,0 +1,4 @@
+cmd=ls
+target=l1_Lw
+
+{"list":["README","some_dir"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.025552034378052,"memory":"1716Kb \/ 1593Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}

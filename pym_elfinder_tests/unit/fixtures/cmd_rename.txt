@@ -1,0 +1,7 @@
+_=1349690638836
+answer=42
+cmd=rename
+name=deeper2-2.txt
+target=l1_c29tZV9kaXIvZGVlcGVyMiBjb3B5IDEudHh0
+
+{"added":[{"mime":"text\/plain","ts":1349690554,"read":1,"write":1,"size":62,"hash":"l1_c29tZV9kaXIvZGVlcGVyMi0yLnR4dA","name":"deeper2-2.txt","phash":"l1_c29tZV9kaXI"}],"removed":["l1_c29tZV9kaXIvZGVlcGVyMiBjb3B5IDEudHh0"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.04041600227356,"memory":"1719Kb \/ 1594Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}

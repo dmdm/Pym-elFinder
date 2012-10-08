@@ -1,0 +1,7 @@
+_=1349689808292
+answer=42
+cmd=mkfile
+name=newfile.txt
+target=l1_c29tZV9kaXI
+
+{"added":[{"mime":"text\/plain","ts":1349689808,"read":1,"write":1,"size":0,"hash":"l1_c29tZV9kaXIvbmV3ZmlsZS50eHQ","name":"newfile.txt","phash":"l1_c29tZV9kaXI"}],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.033044099807739,"memory":"1719Kb \/ 1591Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}

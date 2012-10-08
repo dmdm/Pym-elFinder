@@ -1,0 +1,12 @@
+answer=42
+cmd=put
+target=l1_c29tZV9kaXIvZGVlcGVyMi50eHQ
+# Content must be last field
+content=This is file "deeper.txt" in "some_dir".
+fdgsdfgsdfgd
+rhoobarb
+
+Above is empty line.
+Below is nothing.
+
+{"changed":[{"mime":"text\/plain","ts":1349689356,"read":1,"write":1,"size":62,"hash":"l1_c29tZV9kaXIvZGVlcGVyMi50eHQ","name":"deeper2.txt","phash":"l1_c29tZV9kaXI"}],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.038838863372803,"memory":"1720Kb \/ 1592Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}

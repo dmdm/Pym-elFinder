@@ -1,0 +1,10 @@
+# Rename "deeper.txt" to "deeper2.txt"
+
+_=1349287985211
+answer=42
+cmd=rename
+name=deeper2.txt
+target=l1_c29tZV9kaXIvZGVlcGVyLnR4dA
+
+{"added":[{"mime":"text\/plain","ts":1349281433,"read":1,"write":1,"size":53,"hash":"l1_c29tZV9kaXIvZGVlcGVyMi50eHQ","name":"deeper2.txt","phash":"l1_c29tZV9kaXI"}],"removed":["l1_c29tZV9kaXIvZGVlcGVyLnR4dA"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.058892011642456,"memory":"1543Kb \/ 1516Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
+

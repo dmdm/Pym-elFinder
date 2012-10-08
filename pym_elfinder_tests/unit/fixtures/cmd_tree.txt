@@ -1,0 +1,4 @@
+cmd=tree
+target=l1_Lw
+
+{"tree":[{"mime":"directory","ts":1349613468,"read":1,"write":1,"size":0,"hash":"l1_Lw","volumeid":"l1_","name":"files","locked":1,"dirs":1},{"mime":"directory","ts":1349287985,"read":1,"write":1,"size":0,"hash":"l1_c29tZV9kaXI","name":"some_dir","phash":"l1_Lw"}],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.025806903839111,"memory":"1716Kb \/ 1592Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}

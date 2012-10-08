@@ -1,0 +1,7 @@
+_=1349689729166
+answer=42
+cmd=mkdir
+name=newfldr
+target=l1_c29tZV9kaXI
+
+{"added":[{"mime":"directory","ts":1349689729,"read":1,"write":1,"size":0,"hash":"l1_c29tZV9kaXIvbmV3Zmxkcg","name":"newfldr","phash":"l1_c29tZV9kaXI"}],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.046499013900757,"memory":"1719Kb \/ 1590Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
