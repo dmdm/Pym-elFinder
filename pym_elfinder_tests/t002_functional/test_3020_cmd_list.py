@@ -1,20 +1,20 @@
 import unittest
 
-from . import lib
+from .. import lib
 
 
-class TestCmdMkDir(unittest.TestCase):
+class TestCmdList(unittest.TestCase):
 
     def setUp(self):
         self.finder = lib.create_finder()
 
     # Received on client initialization
-    def test_mkdir(self):
-        fixt = lib.CMD_FIXT['cmd_mkdir.txt'][0]
+    def test_list(self):
+        fixt = lib.CMD_FIXT['cmd_ls.txt'][0]
         r0 = fixt['response'] # expected response
         
         cmd, args = lib.prepare_request(fixt['request'])
-        assert cmd == 'mkdir'
+        assert cmd == 'ls'
         
         # This throws exception on error
         self.finder.run(cmd, args, debug=True)
@@ -26,4 +26,4 @@ class TestCmdMkDir(unittest.TestCase):
 
         self.assertEqual(r0.keys(), r.keys())
         self.maxDiff = None
-        self.assertEqual(r0, r)
+        self.assertEqual(r0['list'].sort(), r['list'].sort())

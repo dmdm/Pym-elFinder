@@ -1,6 +1,6 @@
 import unittest
 
-from . import lib
+from .. import lib
 
 # Make sure, our test lib is correct ;)
 

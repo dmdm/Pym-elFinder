@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from . import lib
+from .. import lib
 from pym_elfinder.finder import Finder
 
 

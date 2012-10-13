@@ -58,10 +58,14 @@ PYM_ERROR_EXTRACT_ARCHIVE_FAILED = 'Could not extract archive'
 PYM_ERROR_INVALID_ARCHIVE = 'Could not extract archive'
 PYM_ERROR_CREATE_ARCHIVE_FAILED = 'Could not extract archive'
 PYM_ERROR_RESIZE_IMAGE_FAILED = 'Could not resize image'
+PYM_ERROR_INVALID_NAME_POLICY = 'Name policy is invalid'
+PYM_ERROR_UNIQUE_NAME = 'Failed to create unique name'
+PYM_ERROR_INVALID_PATH = 'Invalid path'
 
 
 class FinderError(Exception):
-    """General exception class for elFinder.
+    """
+    General exception class for elFinder.
 
     FinderError, like Exception, accepts a list of positional arguments.
     These are treated as in Exception; additional keyword arguments may be
@@ -94,16 +98,20 @@ class FinderError(Exception):
         s += ")"
         return s
 
-    @property
-    def response(self):
-        """Returns error messages as error data for elFinder client.
+    def build_response(self, respond_exceptions=False):
+        """
+        Returns error messages as error data for elFinder client.
 
+        :param respond_exceptions: Tells whether text of nested exceptions
+                                   is included in response or not.
         :returns: Dict {'error': [ list of strings ]}
         """
         errors = []
         for msg in self.args:
             if isinstance(msg, str):
                 errors.append(msg)
+            elif isinstance(msg, Exception) and not respond_exceptions:
+                continue
             else:
                 try:
                     errors += msg

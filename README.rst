@@ -4,7 +4,8 @@ Pym-elFinder - Server component for elFinder
 This is an implementation of elFinder_'s server component. It implements
 the `connector API 2.0`_.
 
-It is intended to be framework agnostic, but we have Pyramid_ in mind.
+It is intended to be framework agnostic.
+
 
 
 

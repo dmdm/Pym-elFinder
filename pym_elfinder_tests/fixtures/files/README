@@ -1,0 +1,12 @@
+These are file fixtures.
+
+elFinder from within the unit tests gets initialized with these.
+
+In the PHP sources of elFinder
+(https://github.com/Studio-42/elFinder/tree/2.x/php), initialize elFinder with
+this directory to obtain the canonical responses.
+
+ATTENTION: If you run elFinder's PHP over these file fixtures, it will create
+hidden directories ".quarantine" and ".tmb". Both are not yet implemented in
+our Finder, so you have to remove them, otherwise any commands that produce
+item listings, like "open init", will fail.

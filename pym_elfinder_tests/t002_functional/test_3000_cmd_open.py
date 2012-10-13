@@ -1,6 +1,8 @@
 import unittest
 
-from . import lib
+from .. import lib
+
+from pprint import pprint
 
 class TestCmdOpen(unittest.TestCase):
 

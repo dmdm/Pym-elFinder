@@ -1,9 +1,0 @@
-_=1349690393580
-answer=42
-cmd=paste
-cut=1
-dst=l1_c29tZV9kaXIvdW50aXRsZWQgZm9sZGVy
-src=l1_c29tZV9kaXI
-targets[]=l1_c29tZV9kaXIvZm9vMg
-
-{"added":[{"mime":"unknown","ts":1349690382,"read":1,"write":1,"size":0,"hash":"l1_c29tZV9kaXIvdW50aXRsZWQgZm9sZGVyL2ZvbzI","name":"foo2","phash":"l1_c29tZV9kaXIvdW50aXRsZWQgZm9sZGVy"}],"removed":["l1_c29tZV9kaXIvZm9vMg"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.038967847824097,"memory":"1721Kb \/ 1597Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}

@@ -33,57 +33,68 @@ class Driver(VolumeDriver):
     
     def _dirname(self, path):
         """
-        Return parent directory path
+        Returns directory name of path.
         """
         return os.path.dirname(path)
 
     def _basename(self, path):
         """
-        Return file name
+        Returns file name of path.
         """
         return os.path.basename(path)
 
-    def _joinpath(self, dir_, name):
+    def _joinpath(self, *args):
         """
-        Join dir name and file name and return full path
+        Joins given arguments with directory separator.
         """
-        return os.path.join(dir_, name)
+        return os.path.join(*args)
     
     def _normpath(self, path):
         """
-        Return normalized path
+        Returns normalized path, i.e. removes '..', obsolete '/' etc.
         """
         return os.path.normpath(path)
     
     def _relpath(self, path):
         """
-        Return file path related to root dir
+        Converts absolute path into path relative to root.
         """
-        return ('' if path == self._root_path
-            else path[len(self._root_path)+len(self._sep):])
+        if path == self._root_path:
+            return ''
+        elif path == '':
+            return '' # On command open-init we get called with empty path
+        else:
+            if not path.startswith(self._root_path + self._sep):
+                raise exc.FinderError(exc.PYM_ERROR_INVALID_PATH, path)
+            return path[len(self._root_path)+len(self._sep):]
     
     def _abspath(self, path):
         """
-        Convert path related to root dir into real path
+        Converts relative path into absolute path starting with root.
         """
-        return (self._root_path if path == self._sep
-            else self._joinpath(self._root_path, path))
+        if path == self._sep:
+            return self._root_path
+        else:
+            return self._joinpath(self._root_path, path)
     
-    def _path(self, path):
+    def _aliaspath(self, path):
         """
-        Return fake path started from root dir
+        Replaces root path part of ``path`` with root's alias name.
         """
-        return (self._root_name if path == self._root_path
-            else self._joinpath(self._root_name, self._relpath(path)))
+        if path == self._root_path:
+            return self._root_alias
+        else:
+            return self._joinpath(self._root_alias, self._relpath(path))
     
     def _inpath(self, path, parent):
         """
-        Return True if path is children of parent
+        Returns True if path is parent or child of parent.
         """
-        try:
-            return path == parent or path.startswith('%s%s' % (parent, self._sep))
-        except:
-            return False
+        path = path.rstrip(self._sep)
+        parent = path.rstrip(self._sep)
+        return (path == parent
+            or path.startswith(parent + self._sep)
+        )
     
     #***************** file stat ********************#
 
@@ -113,7 +124,7 @@ class Driver(VolumeDriver):
                     stat['write'] = False
                     stat['size']  = 0
                     return stat
-                stat['alias']  = self._path(target)
+                stat['alias']  = self._aliaspath(target)
                 stat['target'] = target
                 path = target
                 size = os.lstat(path).st_size
@@ -128,23 +139,31 @@ class Driver(VolumeDriver):
             stat['write'] = os.access(path, os.W_OK)
             if stat['read']:
                 stat['size'] = 0 if is_dir else size
-        except os.error:
-            raise exc.FinderError(exc.ERROR_RM, self._path(path))
+        except OSError:
+            raise exc.FinderError(exc.ERROR_RM, self._aliaspath(path))
         stat['locked'] = False
         stat['hidden'] = False
         return stat
     
     def _has_subdirs(self, path):
         """
-        Return True if path is dir and has at least one child directory
+        Returns True if path is dir and has at least one child directory.
         """
         for entry in os.listdir(path):
             p = path + self._sep + entry
-            if os.path.isdir(p) and not self.has_perm(path=p, name='hidden'):
+            if os.path.isdir(p) and not self.acl_perm(path=p, name='hidden'):
                 return True
         return False
 
     def _tree_stats(self, path, depth, exclude=None):
+        """
+        Returns list of stats of all directories in a tree.
+
+        :param path: Start in this directory
+        :param depth: Go maximum this deep.
+        :param exclude: List of (sub)directories to exclude from result
+        :returns: List of stats
+        """
         prev_root = ''
         depth_cnt = 0
         stats = []
@@ -174,7 +193,7 @@ class Driver(VolumeDriver):
             stats.append(self.stat(p))
         return stats
 
-    def _ls(self, path):
+    def _ls_names(self, path):
         """
         Returns list of names of items in given path.
         """
@@ -199,11 +218,14 @@ class Driver(VolumeDriver):
 ###            except:
 ###                pass
 ###        raise exc.FinderError(exc.PYM_ERROR_NOT_AN_IMAGE)
-    
+   
+    def _exists(self, path):
+        return os.path.exists(path)
+
     #******************** file/dir content *********************#
     def _mimetype(self, path):
         """
-        Attempt to read the file's mimetype
+        Returns path's mimetype.
         """
         return magic.Magic(mime=True).from_file(
             path.encode('utf-8')).decode('utf-8')
@@ -224,78 +246,112 @@ class Driver(VolumeDriver):
             return self._normpath(self._root_path
                 + self._sep + atarget[len(self._root_realpath) + len(self._sep):])
 
-    def _scandir(self, path):
-        """
-        Return files list in directory.
-        The '.' and '..' special directories are ommited.
-        """
-        return ['%s%s%s' % (path, self._sep, x) for x in os.listdir(path)]
-
     def _fopen(self, path, mode='rb'):
         """
-        Open file and return file pointer
+        Opens path as file and returns file pointer.
         """
         return open(path, mode)
     
     def _fclose(self, fp, **kwargs):
         """
-        Close opened file
+        Closes opened file.
         """
         return fp.close()
     
     #********************  file/dir manipulations *************************#
     
-    def _mkdir(self, path, name, mode=None):
+    def _mkdir(self, cur_path, name, mode=None):
         """
-        Create dir and return created dir path or raise an os.error
+        Creates a directory if it does not exist.
+
+        :param path: Path of current directory
+        :param name: Name of directory to create
+        :param mode: Octal mode
+        :returns: Absolute name of created dir
+        :raises: FinderError if dir exists or any OSError occured
         """
         if mode is None:
             mode = self._options['dirMode']
-        path = '%s%s%s' % (path, self._sep, name)
-        os.mkdir(path, mode)
+        path = self._joinpath(cur_path, name)
+        try:
+            os.mkdir(path, mode)
+        except OSError as e:
+            raise exc.FinderError(exc.ERROR_MKDIR, e, name)
         return path
 
-    def _mkfile(self, path, name):
+    def _mkfile(self, cur_path, name, mode=None):
         """
-        Create file and return it's path or False on failed
-        """
-        path = '%s%s%s' % (path, self._sep, name)
+        Creates a file if it does not exist.
 
-        open(path, 'w').close()
-        os.chmod(path, self._options['fileMode'])
+        :param path: Path of current directory
+        :param name: Name of file to create
+        :param mode: Octal mode
+        :returns: Absolute name of created file
+        :raises: FinderError if file exists or any OSError occured
+        """
+        if mode is None:
+            mode = self._options['fileMode']
+        path = self._joinpath(cur_path, name)
+        try:
+            os.open(path, os.O_CREAT | os.O_EXCL, mode)
+            # In Python 3.3 we can use the new "x" mode for built-in open()
+        except OSError as e:
+            raise exc.FinderError(exc.ERROR_MKFILE, e, name)
         return path
 
-    def _symlink(self, source, targetDir, name):
+    def _copy(self, src, dst_dir, name):
         """
-        Create symlink
-        """
-        return os.symlink(source, '%s%s%s' % (targetDir, self._sep, name))
+        Copies a file or directory.
 
-    def _copy(self, source, targetDir, name):
+        :param src: 
+        :returns: Path to the newly created file or directory.
         """
-        Copy file into another file
-        """
-        return shutil.copy(source, '%s%s%s' % (targetDir, self._sep, name))
+        dst = self._joinpath(dst_dir, name)
+        try:
+            if os.path.isdir(src):
+                shutil.copytree(src, dst) # Py3.3: shutil.copy() itself returns dst
+            else:
+                shutil.copy(src, dst) # Py3.3: shutil.copytree() itself returns dst
+            return dst
+        except (IOError, OSError) as e: # Py3.3: OSError; <Py3.3: IOError
+            raise exc.FinderError(exc.ERROR_COPY, e)
 
-    def _move(self, source, targetDir, name):
+    def _move(self, src, dst_dir, name):
         """
-        Move file into another parent dir.
-        Return new file path or False.
+        Moves a file or directory.
+        
+        :returns: Destination path.
         """
-        target = '%s%s%s' % (targetDir, self._sep, name)
-        return target if os.rename(source, target) else False
+        dst = self._joinpath(dst_dir, name)
+        try:
+            shutil.move(src, dst) # Py3.3: shutil.move() itself returns dst
+            return dst
+        except (IOError, OSError) as e:
+            raise exc.FinderError(exc.ERROR_MOVE, e)
 
-    def _unlink(self, path):
-        """
-        Remove file
-        """
-        return os.unlink(path)
+    def _remove(self, path):
+        try:
+            if os.path.isdir(path):
+                os.rmdir(path)
+            else:
+                os.unlink(path)
+        except OSError as e:
+            raise exc.FinderError(exc.ERROR_RM, self._basename(path), e)
+        return path
 
-    def _rmdir(self, path):
-        """
-        Remove dir
-        """
-        return os.rmdir(path)
+###    def _unlink(self, path):
+###        """
+###        Removes a file.
+###        """
+###        os.unlink(path)
+###        return path
+###
+###    def _rmdir(self, path):
+###        """
+###        Removes an empty directory.
+###        """
+###        os.rmdir(path)
+###        return path
 
     def _save(self, fp, dir_, name, mime, **kwargs):
         """

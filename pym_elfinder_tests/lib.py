@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 
+"""
+Helpers for the test suite.
+"""
+
 import os
 from glob import glob
 import anyjson as json
 
 from pym_elfinder import Finder
-from pym_elfinder.volume.localfilesystem import Driver as LocalFileSystemDriver
 from pym_elfinder.cache import Cache
 
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
+"""
+Directory where we store our filesystem fixtures.
+"""
 
 
 # Default options for connector as taken from elFinder's PHP demo.
@@ -23,6 +29,7 @@ DEF_OPTS = dict(
     debug = True,
     roots = [
         dict(
+            id = "1", # ALWAYS DEFINE ID, otherwise we get errors with concurrency
             driver     = 'pym_elfinder.volume.localfilesystem',
                             # path to files (REQUIRED)
             path       = os.path.abspath(os.path.join(
@@ -185,23 +192,32 @@ DEF_OPTS = dict(
     ]
         
 )
+"""
+Default options for connector as taken from elFinder's PHP demo.
 
+These options were active to generate the command fixtures.
+"""
 
 DUMMY_CACHE_DATA = {}
 dummy_cache = Cache(DUMMY_CACHE_DATA)
 
 
-def create_finder():
-    finder = Finder(DEF_OPTS, cache=dummy_cache)
+def create_finder(opts=None):
+    """
+    Creates finder instance for tests and mounts all volumes.
+    """
+    if not opts:
+        opts = DEF_OPTS
+    finder = Finder(opts, cache=dummy_cache)
     finder.debug = True
-    # If we run several tests in sequence, make sure all tests
-    # get the same volume ID
-    LocalFileSystemDriver._volume_cnt = 1
     finder.mount_volumes()
     return finder
 
 
 def diff_dicts(a, b):
+    """
+    Returns a visually pleasant diff of two dicts.
+    """
     fmt = "!! {ka:10} = {va:20} -> {kb:10} = {vb:20}"
     diffs = []
 
@@ -220,6 +236,18 @@ def diff_dicts(a, b):
 
 
 def cmp_dicts(d1, d2, skip=None):
+    """
+    Returns 3 lists of 2-tuples with differences of 2 dicts.
+
+    ``skip`` is an optional list of keys that shall not be compared.
+
+    :returns: 3 lists of 2-tuples:
+              
+              1=items only in dict1, 2=items only in dict2,
+              3=items in both, but different.
+              
+              Each 2-tuple is a key-value pair.
+    """
     if skip is None:
         skip = []
     kk1 = set(d1.keys())
@@ -323,6 +351,11 @@ def load_cmd_fixtures():
 
 
 CMD_FIXT = load_cmd_fixtures()
+"""
+"Constant" of loaded command fixtures.
+
+See :meth:`load_cmd_fixtures()` for details.
+"""
 
 
 def prepare_request(req):
@@ -354,12 +387,20 @@ def prepare_request(req):
 
 
 def prepare_response(resp0, resp, lvl=0, debug=False, remove_these=None, take_these=None):
-    """Removes keys from response that are correct to be different
+    """Processes response for keys that are allowed to be different.
 
     E.g. ``ts`` is the item modification time. If current response and
     fixture differ here, it is ok.
 
     The response is modified in-place, so no return value.
+
+    :param resp0: The reference response
+    :param resp:  The response to be modified
+    :param lvl: Internal
+    :param debug: If True, prints out each processed key and depth
+    :param remove_these: List of keys to be removed from response
+    :param take_these: List of keys whose values are copied from reference resp0
+                       to response resp.
     """
     if remove_these is None:
         remove_these = []
@@ -416,6 +457,10 @@ def prepare_response(resp0, resp, lvl=0, debug=False, remove_these=None, take_th
 
 
 def print_types(d, lvl=0):
+    """
+    Walks a nested data structure and for each key/level prints out the value's
+    type.
+    """
     ind = lvl * '..'
     if isinstance(d, (list, set, tuple)):
         print(ind, ': is list')

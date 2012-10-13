@@ -67,6 +67,13 @@ class Finder:
         """
         Default volume.
         """
+        self.respond_exceptions = False
+        """
+        Tells whether messages of nested exceptions are sent to client or not.
+
+        Nested exceptions may be OSError, and displaying them in the client
+        exposes full path information!
+        """
 
     def mount_volumes(self):
         self.volumes = {}
@@ -105,14 +112,16 @@ class Finder:
         try:
             # Execute command
             result = self.run_command(cmd, cmd_args)
-            self._response.update(result)
-            # Return success
-            return True
+            if 'headers' in result:
+                self._headers = result['headers']
+                del result['headers']
+            self._response = result
         except exc.FinderError as e:
             # TODO Log error
-            self._response = e.response
+            self._response = e.build_response(
+                respond_exceptions=self.respond_exceptions)
             if e.headers:
-                self._headers += e.headers
+                self._headers = e.headers
             self._exception = e
             # Reraise
             raise
@@ -123,7 +132,7 @@ class Finder:
         """Checks and runs given command and returns result dict.
         """
         if not self.volumes:
-            raise exc.FinderError("No volumes mounted. Maybe you frogot to call finder.mount_volumes()?")
+            raise exc.FinderError("No volumes mounted. Maybe you forgot to call finder.mount_volumes()?")
         self.check_command(cmd, cmd_args)
         try:
             func = 'cmd_' + self.__class__.COMMANDS[cmd]['__func__']
@@ -151,9 +160,6 @@ class Finder:
         # Check that command exists
         if not self.command_exists(cmd):
             raise exc.FinderError(exc.ERROR_UNKNOWN_CMD, cmd)
-        # Check that command is not disabled
-        if self.is_cmd_disabled(cmd):
-            raise exc.FinderError(exc.ERROR_PERM_DENIED, cmd)
         # Allowed arguments
         args_def = self.command_args(cmd)
         # Check that command has all required arguments
@@ -288,16 +294,80 @@ class Finder:
         :returns: Dict(list=list(...))
         """
         volume = self._volume_from_hash(target)
-        l = volume.ls_hash(target)
-        return dict(list=l)
+        names = volume.ls_names_hash(target)
+        return dict(list=names)
 
-    def cmd_mkdir(self, target, name, debug=False):
+    def cmd_mkdir(self, target, name):
         """
         Creates a new directory
         """
         volume = self._volume_from_hash(target)
         return dict(added=[volume.mkdir(target, name)])
 
+    def cmd_mkfile(self, target, name):
+        """
+        Creates a new file
+        """
+        volume = self._volume_from_hash(target)
+        return dict(added=[volume.mkfile(target, name)])
+
+    def cmd_paste(self, targets, dst, cut=False, mimes=[]):
+        """
+        Copies or moves source items to destination.
+
+        :param targets: List of source items.
+        :param dst: Hash of destination
+        :param cut: True=Move (i.e. remove source items after copy);
+                    False=Copy
+        :param mimes: Purpose?
+        """
+        # XXX TODO What about mimes?
+        cut = bool(int(cut))
+        result = dict(added=[], removed=[])
+        dst_vol = self._volume_from_hash(dst)
+        # "targets" are in fact the source items
+        for src in targets:
+            src_vol = self._volume_from_hash(src)
+            added, removed = dst_vol.paste(src_vol, src, dst, cut)
+            if added:
+                result['added'].append(added)
+            if removed:
+                result['removed'].append(removed)
+        return result
+
+    def cmd_duplicate(self, targets):
+        """
+        Duplicates source items.
+
+        Name of copy will be original name suffixed with "(copy #)", where "#"
+        is a running number.
+
+        :param targets: List of source items.
+        """
+        result = dict(added=[])
+        # "targets" are in fact the source items
+        for target in targets:
+            vol = self._volume_from_hash(target)
+            added = vol.duplicate(target)
+            if added:
+                result['added'].append(added)
+        return result
+
+    def cmd_rm(self, targets):
+        """
+        Removes items.
+
+        Only empty diresctories will be removed.
+
+        :param targets: List of items.
+        """
+        result = dict(removed=[])
+        for target in targets:
+            vol = self._volume_from_hash(target)
+            removed = vol.remove(target)
+            if removed:
+                result['removed'].append(removed)
+        return result
 
 
 

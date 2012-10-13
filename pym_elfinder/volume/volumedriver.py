@@ -5,6 +5,10 @@ import os
 import copy
 import mimetypes
 from base64 import b64encode, b64decode
+try:
+    from collections.abc import Callable
+except ImportError:
+    from collections import Callable
 
 from .. import exceptions as exc
 
@@ -16,8 +20,6 @@ class VolumeDriver(object):
 
     Must conform to /^[a-z][a-z0-9]*$/. Used as part of volume ID.
     """
-    _volume_cnt = 1
-    """Counter for automatic volume IDs."""
 
     def __init__(self, finder):
         """
@@ -153,7 +155,7 @@ class VolumeDriver(object):
         self._sep = self._options.get('separator', os.sep)
         # Root path
         self._root_path = self._normpath(self._options['path'])
-        self._root_name = self._options.get('alias',
+        self._root_alias = self._options.get('alias',
             self._basename(self._root_path))
 
     def _init_security(self):
@@ -179,17 +181,15 @@ class VolumeDriver(object):
         # Access policy
         self._access_policy = self._options['access_policy']
         # Name policy
-        self._name_policy = self._options.get('name_policy', r'^[^_.]')
+        self.name_policy = self._options.get('name_policy', r'^[^_.]')
 
     def _init_volume_id(self):
-        if self._options['id']:
-            self._volume_id = '{0}{1}_'.format(
-                self.__class__.DRIVER_ID, self._options['id'])
-        else:
-            self._volume_id = '{0}{1}_'.format(
-                self.__class__.DRIVER_ID, self.__class__._volume_cnt)
-            self.__class__._volume_cnt += 1
-        
+        # XXX Generating ID automatically by incrementing a class variable is not
+        # XXX threadsafe!
+        if not 'id' in self._options:
+            raise exc.FinderError(exc.PYM_ERROR_MISSING_VOL_ID)
+        self._volume_id = '{0}{1}_'.format(
+            self.__class__.DRIVER_ID, self._options['id'])
         self._is_mounted = True
 
     def _check_required_options(self, opts):
@@ -202,10 +202,7 @@ class VolumeDriver(object):
         """
         Returns file info.
         """
-        try:
-            return self.stat(self.decode(hash_))
-        except os.error:
-            raise exc.FinderError(exc.ERROR_FILE_NOT_FOUND)
+        return self.stat(self.decode(hash_))
 
     def stat_dir(self, hash_, resolveLink=False):
         """
@@ -214,10 +211,8 @@ class VolumeDriver(object):
         stat = self.stat_file(hash_)
         if resolveLink and 'thash' in stat:
             stat = self.stat_file(stat['thash'])
-
         if stat['mime'] != 'directory' or self.is_hidden(stat):
             raise exc.FinderError(exc.ERROR_DIR_NOT_FOUND)
-
         return stat
 
     def stat(self, path):
@@ -230,8 +225,8 @@ class VolumeDriver(object):
         is_root = (path == self._root_path)
         if is_root:
             stat['volumeid'] = self.volume_id
-            if self._root_name:
-                stat['name'] = self._root_name
+            if self._root_alias:
+                stat['name'] = self._root_alias
             else:
                 stat['name'] = self._basename(path)
         else:
@@ -312,7 +307,7 @@ class VolumeDriver(object):
         return stats
 
     # Renamed from ls()
-    def ls_hash(self, hash_):
+    def ls_names_hash(self, hash_):
         """
         Returns list of names of items inside given hash.
         """
@@ -323,9 +318,9 @@ class VolumeDriver(object):
             if not self.is_hidden(stat) and self.mime_accepted(stat['mime']) ]
         return items
 
-    def ls(self, path):
-        # Make sure we are not accidentally called with a hash instead of path
-        assert path.startswith(self.volume_id) == False
+###    def ls(self, path):
+###        # Make sure we are not accidentally called with a hash instead of path
+###        assert path.startswith(self.volume_id) == False
 
     def tree_stats(self, hash_='', depth=0, exclude=None):
         """
@@ -345,40 +340,237 @@ class VolumeDriver(object):
         dirs[:0] = [ stat ]
         return dirs
 
-    def mkdir(self, dst, name):
+    def mkdir(self, cur, name):
         """
         Creates directory and returns its stat
-        """
-        print("mkdir()'s self:", str(self), type(self))
-        pass
 
-###        if self.commandDisabled('mkdir'):
-###            raise PermissionDeniedError
-###        
-###        if not self.nameAccepted(name):
-###            raise Exception(ElfinderErrorMessages.ERROR_INVALID_NAME)
-###        
-###        try:
-###            dir_ = self.dir(dst) 
-###        except (FileNotFoundError, DirNotFoundError):
-###            raise NamedError(ElfinderErrorMessages.ERROR_TRGDIR_NOT_FOUND, '#%s' % dst)
-###        
-###        if not dir_['write']:
-###            raise PermissionDeniedError
-###        
-###        path = self.decode(dst)
-###        dst  = self._joinPath(path, name)
-###        
-###        try:
-###            self.stat(dst)
-###            raise NamedError(ElfinderErrorMessages.ERROR_EXISTS, name)
-###        except:
-###            self.clearcache()
-###
-###        return self.stat(self._mkdir(path, name))
+        :param cur: Hash of current directory
+        :param name: Name of subdirectory to create
+        """
+
+        # Check that command is not disabled
+        self.check_command('mkdir')
+        # Check that name is valid
+        self.check_name(name)
+
+        # Need write permission on current dir 
+        cur_stat = self.stat_dir(cur)
+        if not self.is_writeable(cur_stat):
+            raise exc.FinderError(exc.ERROR_PERM_DENIED)
+        
+        # Do not overwrite existing object
+        cur_path = self.decode(cur)
+        new_path = self._joinpath(cur_path, name)
+        try:
+            self.stat(new_path)
+            exists = True
+        except exc.FinderError:
+            exists = False
+        if exists:
+            raise exc.FinderError(exc.ERROR_EXISTS, name)
+
+        # Create subdir and return its stat
+        return self.stat( self._mkdir(cur_path, name) )
+
+    def mkfile(self, cur, name):
+        """
+        Creates file and returns its stat
+
+        :param cur: Hash of current directory
+        :param name: Name of file to create
+        """
+
+        # Check that command is not disabled
+        self.check_command('mkfile')
+        # Check that name is valid
+        self.check_name(name)
+
+        # Need write permission on current dir 
+        cur_stat = self.stat_dir(cur)
+        if not self.is_writeable(cur_stat):
+            raise exc.FinderError(exc.ERROR_PERM_DENIED)
+        
+        # Do not overwrite existing object
+        cur_path = self.decode(cur)
+        new_path = self._joinpath(cur_path, name)
+        try:
+            self.stat(new_path)
+            exists = True
+        except exc.FinderError:
+            exists = False
+        if exists:
+            raise exc.FinderError(exc.ERROR_EXISTS, name)
+
+        # Create file and return its stat
+        return self.stat( self._mkfile(cur_path, name) )
     
+    def paste(self, src_vol, src, dst, cut=False):
+        """
+        Paste file to destination
+
+        :param src_vol: Source volume
+        :param src: Hash of source dir/file
+        :param dst: Hash of destination dir/file
+        :param cut: True=Move (Source is deleted), False=Copy
+        """
+        # Check that command is not disabled
+        if cut:
+            self.check_command('move')
+        else:
+            self.check_command('copy')
+        
+        src_stat = self.stat_file(src)
+        src_path = self.decode(src)
+        dst_stat = self.stat_dir(dst)
+        dst_path = self.decode(dst)
+        
+        # Must have write permission on destination and read on source
+        if not self.is_writeable(dst_stat) or not self.is_readable(src_stat):
+            raise exc.FinderError(exc.ERROR_PERM_DENIED)
+        # On move, do not allow to remove source if source or one of its
+        # children is locked
+        if cut:
+            if src_vol.find_child_by_perm(src_path, 'locked'):
+                raise exc.FinderError(exc.ERROR_PERM_DENIED)
+        # If dst subitem exists...
+        dst_fullpath = self._joinpath(dst_path, src_stat['name'])
+        can_overwrite = False
+        try:
+            dstfull_stat = self.stat(dst_fullpath)
+        except exc.FinderError:
+            dstfull_stat = False # Dst does not exist
+        else:
+            # Can overwrite dstfull if ...
+            can_overwrite = (
+                # ... have write permission on dstfull 
+                self.is_writeable(dstfull_stat)
+                # ... overwriting is allowed in options
+                and self._options.get('copyOverwrite', False)
+                # ... neither dstfull nor any of its children are locked
+                and not self.find_child_by_perm(dst_fullpath, 'locked', True)
+                # ... and src and dstfull are of same type, i.e.
+                #     do not replace file with dir or dir with file.
+                and self.is_same_type(src_stat['mime'], dstfull_stat['mime'])
+            )
+
+        if dstfull_stat and can_overwrite:
+            dst_name = self.unique_name(dst_path, src_stat['name'])
+        else:
+            dst_name = src_stat['name']
+        
+        # Copy/move inside current volume
+        if (src_vol == self):
+            if cut:
+                added = self.stat(self.move(src_path, dst_path, dst_name))
+                removed = src # Hash!
+            else:
+                added = self.stat(self.copy(src_path, dst_path, dst_name))
+                removed = None
+            return (added, removed)
+        
+        #copy/move from another volume
+        raise NotImplementedError("Copying/Moving over different volumes is not yet implemented.")
+
+    def move(self, src_path, dst_path, name):
+        """
+        Moves file or directory.
+
+        :returns: Destination path.
+        """
+        return self._move(src_path, dst_path, name)
+
+    def copy(self, src_path, dst_path, name):
+        """
+        Copies file or directory.
+
+        :returns: Path to the newly created file or directory.
+        """
+        return self._copy(src_path, dst_path, name)
+
+    def duplicate(self, hash_):
+        """
+        Create copy of item.
+
+        Name of copy will be original name suffixed with "(copy #)", where "#"
+        is a running number.
+        """
+        self.check_command('duplicate')
+        
+        path = self.decode(hash_)
+        dir_ = self._dirname(path)
+        new_name = self.unique_name(dir_, self._basename(path))
+
+        # TODO check permission to create new item.
+
+        return self.stat(self.copy(path, dir_, new_name))
+
+    def remove(self, hash_):
+        """
+        Removes item.
+
+        Only an empty directory gets removed.
+
+        :param hash_: Hash of item to remove
+        :returns: Full path of removed item
+        """
+        self.check_command('duplicate')
+        path = self.decode(hash_)
+        # TODO check permission to remove this item.
+        return self.encode(self._remove(path))
+
 
     # ===[ HELPERS ]=======
+
+    def unique_name(self, path, name, suffix=" (copy #)"):
+        """
+        Returns a unique new name for given item.
+
+        If a hashmark ('#') is present in ``suffix``, it is replaced by a
+        running number.
+        """
+        name, ext = os.path.splitext(name)
+        num = 0
+        re_suff = re.escape(suffix).replace(r"\#", r"(\d+)") + "$"
+
+        # Check whether name already has a suffix. If so, determine its number. 
+        # Don't bother if suffix shall not contain a number.
+        if '#' in suffix:
+            m = re.match(re_suff, name)
+            if m:
+                num = int(m.group(1))
+
+        # Remove old suffix from name
+        name = re.sub(re_suff, '', name)
+        # Build and append new suffix
+        cnt = 0
+        while True:
+            num += 1
+            new_name = name + suffix.replace("#", str(num)) + ext
+            if not self._exists(self._joinpath(path, new_name)):
+                return new_name
+            cnt += 1
+            if cnt >= 1000:
+                raise exc.FinderError(exc.PYM_ERROR_UNIQUE_NAME, name)
+
+        
+
+        return name + ext
+   
+    def check_name(self, name):
+        if not self.name_policy:
+           raise exc.FinderError(exc.PYM_ERROR_INVALID_NAME_POLICY)
+        if isinstance(self.name_policy, str):
+            if not re.search(self.name_policy, name):
+                raise exc.FinderError(exc.ERROR_INVALID_NAME)
+        elif isinstance(self.name_policy, Callable):
+            self.name_policy(name) # Must raise ERROR_INVALID_NAME
+        else:
+            raise exc.FinderError(exc.PYM_ERROR_INVALID_NAME_POLICY)
+
+    def check_command(self, cmd):
+        # Check that command is not diabled
+        if cmd in self._disabled_cmds:
+            raise exc.FinderError(exc.ERROR_PERM_DENIED, cmd)
 
     def debug_info(self):
         """Returns debug info for client."""
@@ -387,10 +579,67 @@ class VolumeDriver(object):
     # Is function, not property. Child classes can override this more easily.
     def name(self):
         return __name__
+
+    def find_child_by_perm(self, path, perm, val=None):
+        """
+        Returns nearest child (or self) that has given permission.
+
+        Checks whether given path or one of its children has that permission
+        set. If ``val`` is given, permission must have this value, if ``val``
+        is omitted, just the presence of the permission is checked.
+
+        :param path: Path of item where search starts
+        :param perm: Name of permission
+        :param val: A permission value
+        :returns: Path of found item, or None
+        """
+        try:
+            # Fetch info about given path
+            stat = self.stat(path)
+        except exc.FinderError:
+            # If we have no info (because path does not exists or other error
+            # occured, no child is found.
+            return None
+
+        # Check whether required perm is present, and optionally has required
+        # value.
+        if perm in stat:
+            if val is None:
+                return path
+            else:
+                if stat[perm] == val:
+                    return path
+
+        # Given path did not match, shall we look further?
+
+        # If given path is not a directory, we are done
+        if stat['mime'] != 'directory':
+            return None
+
+        # Search path's children.
+        children_stats = self.ls_stats(path)
+        for stat in children_stats:
+            child_path = self._joinpath(path, stat['name'])
+            # Child is a directory, recurse.
+            if stat['mime'] == 'directory':
+                found = self.find_child_by_perm(child_path, perm, val)
+                if found:
+                    return found
+            # Child is regular item
+            else:
+                if perm in stat:
+                    if val is None:
+                        return child_path
+                    else:
+                        if stat[perm] == val:
+                            return child_path
+        # Looked everywhere - found nothing
+        return None
+
     
     def acl_perm(self, path, name, val=None):
         """
-        Check whether item has requested permission.
+        Checks whether item has requested permission.
 
         :param path: Path of dir or file
         :param name: Name of permission
@@ -420,60 +669,90 @@ class VolumeDriver(object):
         # If permission is found, return it
         if perm is not None:
             return perm
-        # Return prev setting
+        # ...else if prev setting is given, return that
         if val is not None:
             return val
-        # Return default permission
+        # ...else return default permission
         return self._default_ace[name]
+
+    def is_same_type(mime1, mime2):
+        """
+        Returns True if both args are directories or both are files.
+        """
+        return (
+            (mime1 == 'directory' and mime2 == 'directory')
+            or
+            (mime1 != 'directory' and mime2 != 'directory')
+        )
 
     def is_readable(self, stat=None):
         """
-        Return True if item is readable.
+        Returns True if item is readable.
 
         Item is given as ``stat``. If left out, returns
         readability of volume.
+
+        If attribute 'read' is missing, returns False.
         """
         if not stat:
             stat = self._stat(self._root_path)
-        return 'read' in stat and stat['read']
+        return stat.get('read', False)
+
+    def is_writeable(self, stat=None):
+        """
+        Returns True if item is writeable.
+
+        Item is given as ``stat``. If left out, returns
+        writeability of volume.
+
+        If attribute 'write' is missing, returns False.
+        """
+        if not stat:
+            stat = self._stat(self._root_path)
+        return stat.get('write', False)
     
     def is_hidden(self, stat=None):
         """
-        Return true if item is hidden.
+        Returns True if item is hidden.
 
         Item is given as ``stat``. If left out, returns
         hiddenness of volume.
+
+        If attribute 'hidden' is missing, returns False.
         """
         if not stat:
             stat = self._stat(self._root_path)
-        return 'hidden' in stat and stat['hidden']
+        return stat.get('hidden', False)
     
     def is_locked(self, stat=None):
         """
-        Return true if item is locked.
+        Returns True if item is locked.
 
         Item is given as ``stat``. If left out, returns
         lockedness of volume.
+
+        If attribute 'locked' is missing, returns True.
         """
         if not stat:
             stat = self._stat(self._root_path)
-        return 'locked' in stat and stat['locked']
+        return stat.get('locked', True)
 
     def is_cmd_disabled(self, cmd):
         """
-        Returns True if command disabled in options
+        Returns True if command is disabled by options.
         """
         return cmd in self._disabled_cmds
 
 
     def mimetype(self, path, name=''):
         """
-        Returns mimetype if given path.
+        Returns mimetype of given path.
         """
         mime = self._mimetype(path)
+        # Mime may be empty if e.g. the tested file is empty. And an empty
+        # file we create e.g. with our mkfile()
         if not mime or mime in ['inode/x-empty', 'application/empty']:
-            mime = self.mimetype_internal_detect(name if name else path,
-                strict=False)
+            mime = self.mimetype_internal_detect(name if name else path)
         return mime
 
     def mimetype_internal_detect(self, path):
@@ -504,7 +783,7 @@ class VolumeDriver(object):
         Return volume options required by client on command open-init
         """
         r = {
-            'path' : self._path(self.decode(hash_)),
+            'path' : self._aliaspath(self.decode(hash_)),
             'url' : self._url,
             'tmbUrl' : self._tmb_url,
             'disabled' : self._disabled_cmds,
@@ -543,36 +822,38 @@ class VolumeDriver(object):
         """
         Encodes path into hash.
         """
-        if path:
-            # Cut ROOT from path for security reason, even if hacker decodes the
-            # path he will not know the root #files hashes will also be valid,
-            # even if root changes
-            p = self._relpath(path)
-            # If reqesting root dir path will be empty, then assign '/' as we
-            # cannot leave it blank for crypt
-            if not p:
-                p = self._sep
-            # Encrypt path and return hash
-            hash_ = self.encrypt(p)
-            # Hash is used as ID in HTML; that means it must contain vaild chars.
-            # Make base64 html-safe and prepend prefix.
-            hash_ = b64encode(
-                    hash_.encode('utf-8')
-                ).decode('ascii') \
-                .translate(
-                    str.maketrans('+/=', '-_.')
-                )
-            # Remove dots '.' at the end (used to be '=' in base64, before the
-            # translation)
-            hash_ = hash_.rstrip('.')
-            # Append volume ID to make hash unique
-            return self.volume_id + hash_
+        # Make sure, path does not contain any '..'
+        path = self._normpath(path)
+        # Cut ROOT from path for security reasons; even if hacker decodes the
+        # path he will not know the root. #files hashes will also be valid,
+        # even if root changes.
+        p = self._relpath(path)
+        # If reqested root dir path is empty, then assign '/' as we
+        # cannot leave it blank for crypt
+        if not p:
+            p = self._sep
+        # Encrypt path and return hash
+        hash_ = self.encrypt(p)
+        # Hash is used as ID in HTML; that means it must contain vaild chars.
+        # Make base64 html-safe and prepend volume ID.
+        hash_ = b64encode(
+                hash_.encode('utf-8')
+            ).decode('ascii') \
+            .translate(
+                str.maketrans('+/=', '-_.')
+            )
+        # Remove dots '.' at the end (used to be '=' in base64, before the
+        # translation)
+        hash_ = hash_.rstrip('.')
+        # Prepend volume ID to make hash unique
+        return self.volume_id + hash_
     
     def decode(self, hash_):
         """
         Decodes path from hash.
         """
         if hash_ == '':
+            # Open-init may call us with empty hash.
             return ''
         if not hash_.startswith(self.volume_id):
             raise exc.FinderError(
@@ -587,6 +868,8 @@ class VolumeDriver(object):
         h = b64decode(h.encode('ascii')).decode('utf-8')
         # Decrypt hash and return path
         path = self.decrypt(h) 
+        # Make sure, path does not contain any '..'
+        path = self._normpath(path)
         # Prepend ROOT to path after it was cut in encode
         return self._abspath(path) 
     

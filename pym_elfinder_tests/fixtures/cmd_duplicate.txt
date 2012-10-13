@@ -1,0 +1,30 @@
+# Duplicate "deeper2.txt" and "image.jpg"
+_=1350061624216
+answer=42
+cmd=duplicate
+targets[]=l1_c29tZV9kaXIvZGVlcGVyMi50eHQ
+targets[]=l1_c29tZV9kaXIvaW1hZ2UuanBn
+
+{"added":[{"mime":"text\/plain","ts":1350061624,"read":1,"write":1,"size":62,"hash":"l1_c29tZV9kaXIvZGVlcGVyMiAoY29weSAxKS50eHQ","name":"deeper2 (copy 1).txt","phash":"l1_c29tZV9kaXI"},{"mime":"image\/jpeg","ts":1350061624,"read":1,"write":1,"size":76603,"hash":"l1_c29tZV9kaXIvaW1hZ2UgKGNvcHkgMSkuanBn","name":"image (copy 1).jpg","phash":"l1_c29tZV9kaXI"}],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.031011819839478,"memory":"1720Kb \/ 1599Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
+
+
+# Duplicate both again; numbers now must be "2"
+_=1350061704978
+answer=42
+cmd=duplicate
+targets[]=l1_c29tZV9kaXIvZGVlcGVyMi50eHQ
+targets[]=l1_c29tZV9kaXIvaW1hZ2UuanBn
+
+{"added":[{"mime":"text\/plain","ts":1350061705,"read":1,"write":1,"size":62,"hash":"l1_c29tZV9kaXIvZGVlcGVyMiAoY29weSAyKS50eHQ","name":"deeper2 (copy 2).txt","phash":"l1_c29tZV9kaXI"},{"mime":"image\/jpeg","ts":1350061705,"read":1,"write":1,"size":76603,"hash":"l1_c29tZV9kaXIvaW1hZ2UgKGNvcHkgMikuanBn","name":"image (copy 2).jpg","phash":"l1_c29tZV9kaXI"}],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.028596878051758,"memory":"1720Kb \/ 1599Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
+
+
+# Now, from outsinde of finder, remove "deeper2 (copy 2).txt" and
+# duplicate "deeper2.txt" and "image.jpg" again.
+# Result must be: "deeper2 (copy 2).txt" and "image (copy 3).jpg"
+_=1350061751112
+answer=42
+cmd=duplicate
+targets[]=l1_c29tZV9kaXIvZGVlcGVyMi50eHQ
+targets[]=l1_c29tZV9kaXIvaW1hZ2UuanBn
+
+{"added":[{"mime":"text\/plain","ts":1350061751,"read":1,"write":1,"size":62,"hash":"l1_c29tZV9kaXIvZGVlcGVyMiAoY29weSAyKS50eHQ","name":"deeper2 (copy 2).txt","phash":"l1_c29tZV9kaXI"},{"mime":"image\/jpeg","ts":1350061751,"read":1,"write":1,"size":76603,"hash":"l1_c29tZV9kaXIvaW1hZ2UgKGNvcHkgMykuanBn","name":"image (copy 3).jpg","phash":"l1_c29tZV9kaXI"}],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.046283006668091,"memory":"1720Kb \/ 1599Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}

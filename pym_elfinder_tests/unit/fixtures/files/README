@@ -1,6 +1,0 @@
-These are file fixtures.
-
-elFinder from within the unit tests gets initialized with these.
-
-In the PHP sources of elFinder (https://github.com/Studio-42/elFinder/tree/2.x/php),
-initialize elFinder with this directory to obtain the canonical responses.

@@ -1,0 +1,21 @@
+# Remove file_1 and file_2
+_=1350089688013
+answer=42
+cmd=rm
+targets[]=l1_c29tZV9kaXIvZmlsZV8xLnR4dA
+targets[]=l1_c29tZV9kaXIvZmlsZV8yLnR4dA
+
+{"removed":["l1_c29tZV9kaXIvZmlsZV8xLnR4dA","l1_c29tZV9kaXIvZmlsZV8yLnR4dA"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.033617973327637,"memory":"1720Kb \/ 1597Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
+
+
+# Remove dir_1
+_=1350089745768
+answer=42
+cmd=rm
+targets[]=l1_c29tZV9kaXIvZGlyXzE
+
+# This response is taken from the PHP implementation, which removes non-empty
+# directory by removing each subitem recursively.
+# Our implementation does not allow to remove non-empty dirs, so just ignore
+# this response in tests, test should instead raise a FinderError.
+{"removed":["l1_c29tZV9kaXIvZGlyXzEvZmlsZV8xXzEudHh0","l1_c29tZV9kaXIvZGlyXzE"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.029146909713745,"memory":"1720Kb \/ 1596Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
