@@ -32,10 +32,13 @@ These fixtures will be dynamically created. Used to test commands paste-copy
 and paste-move.
 """
 
-def mkfile(fn):
+def mkfile(fn, contents=None):
     if os.path.exists(fn):
         raise Exception("mkfile failed, file exists: '{0}'".format(fn))
-    open(fn, "w").close()
+    with open(fn, "w", encoding="utf-8") as fd:
+        if contents:
+            fd.write(contents)
+    fd.close()
 
 def create_src_items(twig, dir_):
     """

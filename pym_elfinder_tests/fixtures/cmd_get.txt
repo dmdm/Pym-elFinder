@@ -1,6 +1,7 @@
-_=1349689195738
+# Get "sometextfile.txt"
+_=1350334416774
 answer=42
 cmd=get
-target=l1_c29tZV9kaXIvZGVlcGVyMi50eHQ
+target=l1_c29tZV9kaXIvc29tZXRleHRmaWxlLnR4dA
 
-{"content":"This is file \"deeper.txt\" in \"some_dir\".\nfdgsdfgsdfgd","debug":{"connector":"php","phpver":"5.4.4-7","time":0.043537855148315,"memory":"1718Kb \/ 1591Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
+{"content":"Some contents.","debug":{"connector":"php","phpver":"5.4.4-7","time":0.045577049255371,"memory":"1719Kb \/ 1597Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}

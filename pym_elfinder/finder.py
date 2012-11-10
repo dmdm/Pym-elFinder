@@ -2,6 +2,9 @@
 
 from importlib import import_module
 import time
+import re
+import urllib
+from pprint import pprint
 
 from . import exceptions as exc
 from . import API_VERSION
@@ -14,7 +17,7 @@ class Finder:
         'tree' : { 'target' : True , '__func__' : 'tree_stats'},
         'parents' : { 'target' : True },
         'tmb' : { 'targets' : True },
-        'file' : { 'target' : True, 'download' : False, 'request' : False },
+        'file' : { 'target' : True, 'download' : False },
         'size' : { 'targets' : True },
         'mkdir' : { 'target' : True, 'name' : True },
         'mkfile' : { 'target' : True, 'name' : True, 'mimes' : False },
@@ -22,7 +25,7 @@ class Finder:
         'rename' : { 'target' : True, 'name' : True, 'mimes' : False },
         'duplicate' : { 'targets' : True },
         'paste' : { 'dst' : True, 'targets' : True, 'cut' : False, 'mimes' : False },
-        'upload' : { 'target' : True, 'FILES' : True, 'mimes' : False, 'html' : False },
+        'upload' : { 'target' : True, 'upload' : True, 'mimes' : False, 'html' : False },
         'get' : { 'target' : True },
         'put' : { 'target' : True, 'content' : '', 'mimes' : False },
         'archive' : { 'targets' : True, 'type_' : True, 'mimes' : False },
@@ -55,7 +58,7 @@ class Finder:
         """
         List of exceptions that may have occured during mounting the volumes.
         """
-        self.upload_error = None
+        self.upload_errors = None
         """
         Exception that occured during upload.
         """
@@ -73,6 +76,14 @@ class Finder:
 
         Nested exceptions may be OSError, and displaying them in the client
         exposes full path information!
+        """
+        self.user_agent = None
+        """
+        User agent string.
+
+        Initialize this attribute inside a request, e.g. in a view in Pyramid.
+        We need it to setup the 'filename' setting in the HTTP headers for
+        downloading a file.
         """
 
     def mount_volumes(self):
@@ -138,12 +149,17 @@ class Finder:
             func = 'cmd_' + self.__class__.COMMANDS[cmd]['__func__']
         except KeyError:
             func = 'cmd_' + cmd
+        # Update quota
+        # TODO  Optimize this
+        for id_, volume in self.volumes.items():
+            volume.update_quota()
+        # Run command
         result = getattr(self, func)(**cmd_args)
         if self.debug:
             result['debug'] = {
                 'connector' : 'Pym-elFinder',
                 'time' : time.time() - self._time,
-                'upload' : self.upload_error,
+                'upload' : self.upload_errors,
                 'volumes' : [],
                 'mountErrors' : self.mount_errors
             }
@@ -222,30 +238,28 @@ class Finder:
                 :uplMaxSize:   The maximum allowed upload size (if kwargs['init'] is ``True``)
                 :error:        on failed
         """
+        #import ipdb; ipdb.set_trace()
         if not init and not target:
             raise exc.FinderError(exc.ERROR_INV_PARAMS, 'open')
-        hash_ = 'default folder' if init else '#' + target
         
         try:
             volume = self._volume_from_hash(target)
-        except exc.FinderError as e:
+        except exc.FinderError:
             if init:
                 volume = self.default_volume
             else:
                 raise
 
-        if init:
-            try:
+        try:
+            cwd = volume.stat_dir(hash_=target, resolveLink=True)
+        except exc.FinderError:
+            if init:
                 cwd = volume.stat_dir(hash_=volume.default_hash(), resolveLink=True)
-            except exc.FinderError as e:
-                raise exc.FinderError(exc.ERROR_OPEN, hash_, e)
-        else:
-            try:
-                cwd = volume.stat_dir(hash_=target, resolveLink=True)
-            except exc.FinderError as e:
-                raise exc.FinderError(exc.ERROR_OPEN, hash_, e)
+            else:
+                raise
+            
         if not cwd['read']:
-            raise exc.FinderError(exc.ERROR_OPEN, hash_, exc.ERROR_PERM_DENIED)
+            raise exc.FinderError(exc.ERROR_PERM_DENIED)
 
         files = []
         # Fetch complete tree spanning all volumes
@@ -254,13 +268,9 @@ class Finder:
                 files += self.volumes[id_].tree_stats(exclude=target)
         
         # Add items of CWD to files
-        # XXX Why does this have try...except, and tree() above does not?
-        try:
-            for f in volume.ls_stats_hash(cwd['hash']):
-                if f not in files:
-                    files.append(f)
-        except exc.FinderError as e:
-            raise exc.FinderError(exc.ERROR_OPEN, cwd['name'], e)
+        for f in volume.ls_stats_hash(cwd['hash']):
+            if f not in files:
+                files.append(f)
         
         result = {
             'cwd' : cwd,
@@ -329,8 +339,7 @@ class Finder:
         for src in targets:
             src_vol = self._volume_from_hash(src)
             added, removed = dst_vol.paste(src_vol, src, dst, cut)
-            if added:
-                result['added'].append(added)
+            result['added'].append(added)
             if removed:
                 result['removed'].append(removed)
         return result
@@ -349,8 +358,7 @@ class Finder:
         for target in targets:
             vol = self._volume_from_hash(target)
             added = vol.duplicate(target)
-            if added:
-                result['added'].append(added)
+            result['added'].append(added)
         return result
 
     def cmd_rm(self, targets):
@@ -365,11 +373,154 @@ class Finder:
         for target in targets:
             vol = self._volume_from_hash(target)
             removed = vol.remove(target)
-            if removed:
-                result['removed'].append(removed)
+            result['removed'].append(removed)
+        return result
+    
+    def cmd_upload(self, target, upload):
+        """
+        Uploads one or more files.
+
+        ``upload`` is a list of file objects, with attributes ``filename`` and ``file``.
+        E.g. if you upload files in Pyramid, those are of type ``cgi.FieldStorage``.
+        ``file`` is a file-like object.
+
+        If you upload several files, the process terminates at the first error.
+        :attr:`upload_errors` then contains a list of the occurred exceptions.
+
+        :param target: Hash of destination directory.
+        :param upload: List of file objects
+        """
+        self.upload_errors = []
+        result = dict(added=[])
+        volume = self._volume_from_hash(target)
+        
+        for fo in upload:
+            try:
+                added = volume.upload(fo, target)
+                result['added'].append(added)
+            except exc.FinderError as e:
+                self.upload_errors.append(e)
+                result['error'] = (e.args[0], fo.filename)
+                result['errorData'] = {fo.filename : str(e.args)}
+                break
         return result
 
+    def cmd_rename(self, target, name):
+        """
+        Renames an item.
 
+        :param target: Hash of item to rename
+        :param name: New name
+        """
+        result = dict(added=[], removed=[])
+        vol = self._volume_from_hash(target)
+        added, removed = vol.rename(target, name)
+        result['added'].append(added)
+        result['removed'].append(removed)
+        return result
+
+    def cmd_file(self, target, download=False):
+        """
+        Prepares headers and file descriptor to download a file.
+
+        Key ``file`` is a file-like object, i.e. it sports methods ``read()``
+        etc. E.g. if volume driver is LocalFileSystem, ``file`` is a file
+        descriptor for an open file.
+
+        ``file`` is suitable to be attached to framework's response object to
+        be streamed to client. E.g. for Pyramid::
+        
+            response.body_file = finder.response['file']
+
+        ``stat`` is the info as obtained from :meth:`~pym_elfinder.volume.volumedriver.VolumeDriver.stat()`.
+        
+        See also :meth:`~pym_elfinder.volume.volumedriver.VolumeDriver.file()`.
+
+        ``headers`` contain the HTTP headers initialized to transport the file.
+
+        Make sure, caller initializes Finder's ``user_agent`` attribute. Otherwise, the filename
+        may not be set correctly.
+
+        See also:
+
+        - http://stackoverflow.com/questions/11764229/header-to-send-chunked-binary-in-pyramid
+        - http://docs.webob.org/en/latest/file-example.html
+
+        :param target: Hash of file to download
+        :param download: Determines content-disposition: True=attachment,
+                         False=inline
+        :returns: Dict with keys ``file``, ``stat`` and ``headers``.
+        """
+        # Catch all exceptions so that we can setup the appropriate HTTP
+        # headers. We do not return an AJAX response, but some data to allow
+        # caller to stream the file.
+        try:
+            vol = self._volume_from_hash(target)
+            # Any checks and access control are done by the volume (like for all
+            # other commands), not here by the finder.
+            result = vol.file(target)
+        except exc.FinderError as e:
+            raise # Let FinderErrors bubble up
+        except Exception as e:
+            # Catch any other errors, since we must setup the HTTP headers
+            raise exc.FinderError(exc.ERROR_UNKNOWN, e,
+                status=exc.HTTP_INTERNAL_SERVER_ERROR)
+        else:
+            stat = result['stat']
+            if download:
+                disp = 'attachment'
+                mime = 'application/octet-stream'
+            else:
+                if re.match('(image|text)', stat['mime'], re.IGNORECASE) \
+                        or stat['mime'] == 'application/x-shockwave-flash':
+                    disp = 'inline'
+                else:
+                    disp = 'attachment'
+                mime = stat['mime']
+
+            quoted_name = urllib.parse.quote(stat['name'])
+            # ASCII only
+            if '%' in quoted_name:
+                filename = 'filename="%s"' % stat['name']
+            # Setup for specific UAs
+            elif self.user_agent:
+                # IE < 9 does not support RFC 6266 (RFC 2231/RFC 5987)
+                if re.search('MSIE [4-8]', self.user_agent):
+                    filename = 'filename="%s"' % quoted_name
+                # Safari
+                elif not 'Chrome' in self.user_agent and 'Safari' in self.user_agent:
+                    filename = 'filename="%s"' % stat['name'].replace('"','')
+                # RFC 6266 (RFC 2231/RFC 5987)
+                else:
+                    filename = "filename*=UTF-8''%s" % quoted_name
+            # Default to be standards compliant!
+            # RFC 6266 (RFC 2231/RFC 5987)
+            else:
+                filename = "filename*=UTF-8''%s" % quoted_name
+
+            if not 'headers' in result:
+                result['headers'] = dict()
+            # XXX Remember, header values must be strings!
+            result['headers']['Content-Type'] = mime
+            result['headers']['Content-Disposition'] = "{0};{1}".format(disp, filename)
+            result['headers']['Content-Location'] = stat['name']
+            result['headers']['Content-Transfer-Encoding'] = 'binary'
+            result['headers']['Content-Length'] = str(stat['size'])
+            return result
+
+    def cmd_get(self, target):
+        """
+        Gets content of a file.
+        """
+        vol = self._volume_from_hash(target)
+        return dict(content=vol.get_content(target))
+
+    def cmd_put(self, target, content, mimes=None):
+        """
+        Writes new content to an existing file.
+        """
+        vol = self._volume_from_hash(target)
+        return dict(changed=[ vol.put_content(target, content, mimes) ] )
 
 
     # =======================================================================

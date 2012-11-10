@@ -43,10 +43,16 @@ class VolumeDriver(object):
         # Renamed from "onlyMimes"
         self._only_mimes = None
         # Renamed from "uploadAllow"
-        self._upload_allow = None
-        self._upload_deny = self._options['uploadDeny'] if 'uploadDeny' in self._options else []
+        self._upload_allow = []
+        # Renamed from "uploadDeny"
+        self._upload_deny = []
         # Renamed from "uploadOrder"
-        self._upload_order = None
+        self._upload_order = []
+        # Renamed from uploadMaxSize
+        self._upload_max_size = 2*1024*1024
+        """
+        Maximum size of a single uploaded file in bytes.
+        """
         # Renamed from "disabled"
         self._disabled_cmds = None
         # Renamed from "treeDeep"
@@ -132,24 +138,23 @@ class VolumeDriver(object):
         self._init_uploads()
         self._init_thumbs()
 
-        self._tree_depth = int(self._options.get('tree_depth', 1))
+        self._tree_depth = int(self._options.get('tree_depth', self._tree_depth))
         if self._tree_depth < 1:
             self._tree_depth = 1
         
-        self._url = self._options.get('URL', '')
+        self._url = self._options.get('URL', self._url)
 
     def _init_thumbs(self):
-        self._tmb_size  = int(self._options.get('tmbSize', 48))
+        self._tmb_size  = int(self._options.get('tmbSize', self._tmb_size))
         if self._tmb_size < 1:
             self._tmb_size = 48
-        self._tmb_url = self._options.get('tmbURL', '')
+        self._tmb_url = self._options.get('tmbURL', self._tmb_url)
 
     def _init_uploads(self):
-        self._only_mimes    = self._options.get('onlyMimes', [])
-        self._upload_allow  = self._options.get('uploadAllow', [])
-        self._upload_deny   = self._options.get('uploadDeny', [])
-        self._upload_order  = self._options.get('uploadOrder', [])
-        self._disabled_cmds = self._options.get('disabled_cmds', [])
+        self._upload_allow  = self._options.get('uploadAllow', self._upload_allow)
+        self._upload_deny   = self._options.get('uploadDeny', self._upload_deny)
+        self._upload_order  = self._options.get('uploadOrder', self._upload_order)
+        self._upload_max_size = self._options.get('uploadMaxSize', self._upload_max_size)
 
     def _init_paths(self):
         self._sep = self._options.get('separator', os.sep)
@@ -159,6 +164,10 @@ class VolumeDriver(object):
             self._basename(self._root_path))
 
     def _init_security(self):
+        # Disabled commands
+        self._disabled_cmds = self._options.get('disabled_cmds', [])
+        # Show only these mimes
+        self._only_mimes    = self._options.get('onlyMimes', self._only_mimes)
         # Default ACE
         self._default_ace = {
             'read'   : self._options['default_ace'].get('read', True),
@@ -182,6 +191,8 @@ class VolumeDriver(object):
         self._access_policy = self._options['access_policy']
         # Name policy
         self.name_policy = self._options.get('name_policy', r'^[^_.]')
+        # Quota
+        self._max_size = self._options.get('max_size', 5*1024*1024) # Default 20MB
 
     def _init_volume_id(self):
         # XXX Generating ID automatically by incrementing a class variable is not
@@ -240,19 +251,19 @@ class VolumeDriver(object):
         if not 'size' in stat or stat['mime'] == 'directory':
             stat['size'] = 0
 
-        stat['read'] = int(self.acl_perm(path=path, name='read', val=stat.get('read', None)))
-        stat['write'] = int(self.acl_perm(path=path, name='write', val=stat.get('write', None)))
+        stat['read'] = int(self.acl_perm(path=path, perm_name='read', val=stat.get('read', None)))
+        stat['write'] = int(self.acl_perm(path=path, perm_name='write', val=stat.get('write', None)))
 
         if is_root:
             stat['locked'] = 1
-        elif self.acl_perm(path=path, name='locked', val=self.is_locked(stat)):
+        elif self.acl_perm(path=path, perm_name='locked', val=self.is_locked(stat)):
             stat['locked'] = 1
         elif 'locked' in stat:
             del stat['locked']
 
         if is_root and 'hidden' in stat:
             del stat['hidden']
-        elif self.acl_perm(path=path, name='hidden', val=self.is_hidden(stat)) \
+        elif self.acl_perm(path=path, perm_name='hidden', val=self.is_hidden(stat)) \
                 or not self.mime_accepted(stat['mime']):
             stat['hidden'] = 0 if is_root else 1
         elif 'hidden' in stat:
@@ -282,7 +293,10 @@ class VolumeDriver(object):
             del stat['target']
 
         return stat
-    
+   
+    def update_quota(self):
+        self._update_quota()
+
     # Renamed from scandir()
     def ls_stats_hash(self, hash_):
         """
@@ -424,6 +438,9 @@ class VolumeDriver(object):
         dst_stat = self.stat_dir(dst)
         dst_path = self.decode(dst)
         
+        # Check quota
+        if self.free_size < src_stat['size']:
+            raise exc.FinderError(exc.PYM_ERROR_QUOTA_EXCEEDED.format(self.free_size))
         # Must have write permission on destination and read on source
         if not self.is_writeable(dst_stat) or not self.is_readable(src_stat):
             raise exc.FinderError(exc.ERROR_PERM_DENIED)
@@ -500,6 +517,10 @@ class VolumeDriver(object):
         dir_ = self._dirname(path)
         new_name = self.unique_name(dir_, self._basename(path))
 
+        # Check quota
+        stat = self.stat(path)
+        if self.free_size < stat['size']:
+            raise exc.FinderError(exc.PYM_ERROR_QUOTA_EXCEEDED.format(self.free_size))
         # TODO check permission to create new item.
 
         return self.stat(self.copy(path, dir_, new_name))
@@ -517,6 +538,186 @@ class VolumeDriver(object):
         path = self.decode(hash_)
         # TODO check permission to remove this item.
         return self.encode(self._remove(path))
+
+    def upload(self, fo, dst):
+        """
+        Stores uploaded file.
+
+        Object of uploaded file must have properties ``filename`` and
+        ``file``, which is a file descriptor.
+
+        :param fo: Object of uploaded file
+        :param dst: Hash of destination directory
+        """
+        # Command "upload" allowed?
+        self.check_command('upload')
+
+        dst_dir_stat = self.stat_dir(dst)
+        dst_dir_path = self.decode(dst)
+        dst_fn = fo.filename
+
+        # Filename OK?
+        self.check_name(dst_fn)
+        dst_f_path = self._joinpath(dst_dir_path, dst_fn)
+        
+        # Allowed to write into dst dir?
+        if not self.is_writeable(dst_dir_stat):
+            raise exc.FinderError(exc.ERROR_PERM_DENIED)
+        # If file exists, allowed to overwrite?
+        try:
+            stat = self.stat(dst_f_path)
+        except exc.FinderError:
+            pass # File does not exist -> upload OK
+        else:
+            if (
+                not self._options['uploadOverwrite']
+                or not self.is_writeable(stat)
+                or self.is_locked(stat)
+            ):
+                raise exc.FinderError(exc.ERROR_PERM_DENIED)
+
+        # Check size
+        def get_size(fd):
+            fd.seek(0, os.SEEK_END) # Seek to the end of the file
+            size = fd.tell() # Get the position of EOF
+            fd.seek(0) # Reset the file position to the beginning
+            return size
+        sz = get_size(fo.file)
+        if sz > self._upload_max_size:
+            raise exc.FinderError(exc.ERROR_UPLOAD_FILE_SIZE)
+        # Check quota
+        if self.free_size < sz:
+            raise exc.FinderError(exc.PYM_ERROR_QUOTA_EXCEEDED.format(self.free_size))
+
+        # TODO Check mime types
+        
+        # Save file on volume and return its stat
+        return self.stat( self._save_uploaded(fo.file, dst_dir_path, dst_fn) )
+
+    def rename(self, target, name):
+        """
+        Renames item.
+
+        :param target: Hash of item to rename
+        :param name: New name
+        :returns: 2-tuple:
+                  [0] List of stats of added items,
+                  [1] List of hashes of removed items
+        """
+        self.check_command('rename')
+        src = self.decode(target)
+        dst = self._joinpath(self._dirname(src), name)
+        # Do not allow renaming to an existing item (which would be
+        # overwritten)
+        if self._exists(dst):
+            raise exc.FinderError(exc.ERROR_EXISTS, name)
+        added = self.stat(self._rename(src, dst))
+        removed = target # Hash!
+        return (added, removed)
+
+    def file(self, target):
+        """
+        Returns file-like object and info for target as a dict.
+
+        Key ``file`` is a file-like object, i.e. it sports methods like ``read()``
+        etc. E.g. if volume driver is LocalFileSystem, ``file`` is a file
+        descriptor of an open file.
+
+        ``file`` is suitable to be attached to framework's response object to
+        be streamed to client. E.g. for Pyramid::
+        
+            response.app_iter = finder.response['file']
+
+        ``stat`` is the info as obtained from :meth:`~pym_elfinder.volume.volumedriver.VolumeDriver.stat()`.
+
+        :param target: Hash of file
+        :returns: Dict with keys ``file`` and ``stat``
+        """
+        # Command is enabled?
+        self.check_command('file')
+        path = self.decode(target)
+        # Target exists?
+        try:
+            stat = self.stat(path)
+        except exc.FinderError as e:
+            raise exc.FinderNotFound(e)
+        # Target is not a directory?
+        if stat['mime'] == 'directory':
+            raise exc.FinderNotFound()
+        # Have read permission?
+        if not self.is_readable(stat):
+            raise exc.FinderAccessDenied()
+        # Open target as file-like object
+        try:
+            fd = self._file(path)
+        except exc.FinderError as e:
+            raise exc.FinderNotFound(e)
+        # Return result
+        return dict(
+            file = fd,
+            stat = stat
+        )
+
+    def get_content(self, target):
+        """
+        :param target: Hash of file
+        :returns: File content as bytes or, for text files, as str
+        """
+        # Command is enabled?
+        self.check_command('get')
+        path = self.decode(target)
+        # Target exists?
+        try:
+            stat = self.stat(path)
+        except exc.FinderError as e:
+            raise exc.FinderError(exc.ERROR_FILE_NOT_FOUND, e)
+        # Target is not a directory?
+        if stat['mime'] == 'directory':
+            raise exc.FinderError(exc.ERROR_NOT_FILE)
+        # Have read permission?
+        if not self.is_readable(stat):
+            raise exc.FinderError(exc.ERROR_PERM_DENIED)
+        # Get content
+        if self.is_binary(stat):
+            encoding = None
+        else:
+            encoding = 'UTF-8'
+        return self._get_content(path, encoding=encoding)
+
+    def put_content(self, target, content, mime=None):
+        """
+        Puts new content into existing file.
+
+        :param target: Hash of file
+        :param content: Contents to write into file; str for text files,
+                         bytes for binary
+        :param mime: ???
+        :returns: Stat info of changed file
+        """
+        # Command is enabled?
+        self.check_command('put')
+        path = self.decode(target)
+        # Check quota
+        if self.free_size < len(content):
+            raise exc.FinderError(exc.PYM_ERROR_QUOTA_EXCEEDED.format(self.free_size))
+        # Target exists?
+        # We allow only writing to an existing file, changing its content.
+        try:
+            stat = self.stat(path)
+        except exc.FinderError as e:
+            raise exc.FinderError(exc.ERROR_FILE_NOT_FOUND, e)
+        # Target is not a directory?
+        if stat['mime'] == 'directory':
+            raise exc.FinderError(exc.ERROR_NOT_FILE)
+        # Have write permission?
+        if not self.is_writeable(stat):
+            raise exc.FinderError(exc.ERROR_PERM_DENIED)
+        # Put content
+        if self.is_binary(stat):
+            encoding = None
+        else:
+            encoding = 'UTF-8'
+        return self.stat(self._put_content(path, content, encoding=encoding))
 
 
     # ===[ HELPERS ]=======
@@ -551,30 +752,48 @@ class VolumeDriver(object):
             cnt += 1
             if cnt >= 1000:
                 raise exc.FinderError(exc.PYM_ERROR_UNIQUE_NAME, name)
-
-        
-
         return name + ext
    
     def check_name(self, name):
+        """
+        Checks that given name conforms to a certain policy.
+
+        Policy is set in options as either regular expression or callable.
+
+        :raises: :class:`..exceptions.FinderError`
+        """
+        # Options must define a name policy
         if not self.name_policy:
            raise exc.FinderError(exc.PYM_ERROR_INVALID_NAME_POLICY)
+        # Policy may be a regex
         if isinstance(self.name_policy, str):
             if not re.search(self.name_policy, name):
                 raise exc.FinderError(exc.ERROR_INVALID_NAME)
+        # ... or a callable
         elif isinstance(self.name_policy, Callable):
             self.name_policy(name) # Must raise ERROR_INVALID_NAME
+        # ... if it's neither it is an error
         else:
             raise exc.FinderError(exc.PYM_ERROR_INVALID_NAME_POLICY)
 
-    def check_command(self, cmd):
+    def check_command(self, cmd, exc_args=None):
+        """
+        Checks that command may be executed.
+
+        At the moment, only checks that command is not disabled in options.
+
+        :raises: :class:`..exceptions.FinderAccessDenied`
+        """
+        if exc_args is None:
+            exc_args = []
         # Check that command is not diabled
         if cmd in self._disabled_cmds:
-            raise exc.FinderError(exc.ERROR_PERM_DENIED, cmd)
+            raise exc.FinderAccessDenied(exc.ERROR_PERM_DENIED, cmd, exc_args)
 
     def debug_info(self):
         """Returns debug info for client."""
-        return dict(id=self.volume_id, name=self.name())
+        return dict(id=self.volume_id, name=self.name(),
+            quota="{0:,d} of {1:,d}".format(self.used_size, self.max_size))
 
     # Is function, not property. Child classes can override this more easily.
     def name(self):
@@ -597,8 +816,8 @@ class VolumeDriver(object):
             # Fetch info about given path
             stat = self.stat(path)
         except exc.FinderError:
-            # If we have no info (because path does not exists or other error
-            # occured, no child is found.
+            # If we have no info (because path does not exist or other error
+            # occured) no child is found.
             return None
 
         # Check whether required perm is present, and optionally has required
@@ -637,7 +856,7 @@ class VolumeDriver(object):
         return None
 
     
-    def acl_perm(self, path, name, val=None):
+    def acl_perm(self, path, perm_name, val=None):
         """
         Checks whether item has requested permission.
 
@@ -645,15 +864,15 @@ class VolumeDriver(object):
         :param name: Name of permission
         :param val: 
         """
-        # Invalid perm name is always denied
-        if not name in self._default_ace:
-            return False
+        # Invalid perm name is undefined
+        if not perm_name in self._default_ace:
+            return None
 
         perm = None
 
         # Call access policy
         if self._access_policy:
-            perm = self._access_policy(self, path, name)
+            perm = self._access_policy(self, path, perm_name)
             if perm != None:
                 return perm
 
@@ -663,8 +882,8 @@ class VolumeDriver(object):
         path = '/%s' % path
 
         for ace in self._acl:
-            if name in ace and re.search(ace['pattern'], path):
-                perm = ace[name]
+            if perm_name in ace and re.search(ace['pattern'], path):
+                perm = ace[perm_name]
         
         # If permission is found, return it
         if perm is not None:
@@ -673,7 +892,7 @@ class VolumeDriver(object):
         if val is not None:
             return val
         # ...else return default permission
-        return self._default_ace[name]
+        return self._default_ace[perm_name]
 
     def is_same_type(mime1, mime2):
         """
@@ -752,7 +971,10 @@ class VolumeDriver(object):
         # Mime may be empty if e.g. the tested file is empty. And an empty
         # file we create e.g. with our mkfile()
         if not mime or mime in ['inode/x-empty', 'application/empty']:
+            prev_mime = mime
             mime = self.mimetype_internal_detect(name if name else path)
+            if not mime:
+                mime = prev_mime
         return mime
 
     def mimetype_internal_detect(self, path):
@@ -777,6 +999,17 @@ class VolumeDriver(object):
             or mime in mimes
             or mime[0:mime.find('/')] in mimes
         )
+
+    def is_binary(self, stat_or_mime):
+        """
+        Returns True if mime-type indicates binary type.
+
+        :param stat_or_mime: A dict with stat info that has key "mime" or
+                             mime-type as string
+        :returns: True/False
+        """
+        mime = stat_or_mime['mime'] if 'mime' in stat_or_mime else stat_or_mime
+        return not mime.lower().startswith("text/")
     
     def get_open_init_options(self, hash_):
         """
@@ -908,6 +1141,25 @@ class VolumeDriver(object):
         """Tells whether this volume is properly mounted or not."""
         return self._is_mounted
 
+    @property
+    def max_size(self):
+        """Returns max quota in bytes."""
+        return self._max_size
+
+    @property
+    def used_size(self):
+        """
+        Returns used size on bytes.
+        
+        Is calculated on invocation of a command.
+        """
+        return self._used_size
+
+    @property
+    def free_size(self):
+        """Returns free size in bytes."""
+        return self._max_size - self._used_size
+
     DEFAULT_OPTIONS = {
             'id' : '',
             #root directory path
@@ -948,7 +1200,7 @@ class VolumeDriver(object):
             #order to proccess uploadAllow and uploadDeny options
             'uploadOrder' : ['deny', 'allow'],
             #maximum upload file size. NOTE - this is size for every uploaded files
-            'uploadMaxSize' : 0,
+            #'uploadMaxSize' : 0,
             #files dates format. CURRENTLY NOT IMPLEMENTED
             'dateFormat' : 'j M Y H:i',
             #files time format. CURRENTLY NOT IMPLEMENTED

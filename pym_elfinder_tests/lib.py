@@ -311,6 +311,7 @@ def load_cmd_fixtures():
                     if "content" in req:
                         if len(req["content"][-1].strip()) == 0:
                             del req["content"][-1]
+                        req['content'] = "\n".join(req['content'])
                     # Process JSON response and store request and response
                     resp = json.loads(ln)
                     item['request'] = req

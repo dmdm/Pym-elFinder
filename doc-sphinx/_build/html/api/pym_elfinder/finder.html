@@ -1,0 +1,438 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pym_elfinder.finder &mdash; Pym-elFinder 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Pym-elFinder 0.0.1 documentation" href="../../index.html" />
+    <link rel="next" title="pym_elfinder.volume.volumedriver" href="../pym_elfinder/volume/volumedriver.html" />
+    <link rel="prev" title="pym_elfinder" href="../pym_elfinder.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../pym_elfinder/volume/volumedriver.html" title="pym_elfinder.volume.volumedriver"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../pym_elfinder.html" title="pym_elfinder"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">Pym-elFinder 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-pym_elfinder.finder">
+<span id="pym-elfinder-finder"></span><h1>pym_elfinder.finder<a class="headerlink" href="#module-pym_elfinder.finder" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pym_elfinder.finder.Finder">
+<em class="property">class </em><tt class="descclassname">pym_elfinder.finder.</tt><tt class="descname">Finder</tt><big>(</big><em>opts</em>, <em>cache</em>, <em>session=None</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.check_command">
+<tt class="descname">check_command</tt><big>(</big><em>cmd</em>, <em>cmd_args</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.check_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks validity of command and its arguments.</p>
+<p>After the check, finder&#8217;s properties <tt class="docutils literal"><span class="pre">cmd</span></tt>, <tt class="docutils literal"><span class="pre">cmd_args</span></tt>
+and <tt class="docutils literal"><span class="pre">surplus_args</span></tt> are set.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.cmd_duplicate">
+<tt class="descname">cmd_duplicate</tt><big>(</big><em>targets</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.cmd_duplicate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duplicates source items.</p>
+<p>Name of copy will be original name suffixed with &#8220;(copy #)&#8221;, where &#8220;#&#8221;
+is a running number.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>targets</strong> &#8211; List of source items.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.cmd_file">
+<tt class="descname">cmd_file</tt><big>(</big><em>target</em>, <em>download=False</em>, <em>request=False</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.cmd_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares headers and file descriptor to download a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>target</strong> &#8211; Hash of file to download</li>
+<li><strong>download</strong> &#8211; Determines content-disposition: True=attachment,
+False=inline</li>
+<li><strong>request</strong> &#8211; <p>???</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Dict with info, e.g. open file descriptor etc.
+See <a class="reference internal" href="../pym_elfinder/volume/volumedriver.html#pym_elfinder.volume.volumedriver.VolumeDriver.file" title="pym_elfinder.volume.volumedriver.VolumeDriver.file"><tt class="xref py py-meth docutils literal"><span class="pre">pym_elfinder.volume.volumedriver.VolumeDriver.file()</span></tt></a> for
+details.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.cmd_ls_hash">
+<tt class="descname">cmd_ls_hash</tt><big>(</big><em>target</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.cmd_ls_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of item names in requested directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>target</strong> &#8211; Hash of directory</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dict(list=list(...))</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.cmd_mkdir">
+<tt class="descname">cmd_mkdir</tt><big>(</big><em>target</em>, <em>name</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.cmd_mkdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new directory</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.cmd_mkfile">
+<tt class="descname">cmd_mkfile</tt><big>(</big><em>target</em>, <em>name</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.cmd_mkfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.cmd_open">
+<tt class="descname">cmd_open</tt><big>(</big><em>target=''</em>, <em>init=False</em>, <em>tree=False</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.cmd_open" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Command</strong>: Open a directory</p>
+<dl class="docutils">
+<dt>Return:</dt>
+<dd><dl class="first last docutils">
+<dt>An array with following elements:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">cwd:</th><td class="field-body">opened directory information</td>
+</tr>
+<tr class="field-even field"><th class="field-name">files:</th><td class="field-body">opened directory content [and dirs tree if kwargs[&#8216;tree&#8217;] is <tt class="docutils literal"><span class="pre">True</span></tt>]</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">api:</th><td class="field-body">api version (if kwargs[&#8216;init&#8217;] is <tt class="docutils literal"><span class="pre">True</span></tt>)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">uplMaxSize:</th><td class="field-body">The maximum allowed upload size (if kwargs[&#8216;init&#8217;] is <tt class="docutils literal"><span class="pre">True</span></tt>)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">error:</th><td class="field-body">on failed</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.cmd_paste">
+<tt class="descname">cmd_paste</tt><big>(</big><em>targets</em>, <em>dst</em>, <em>cut=False</em>, <em>mimes=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.cmd_paste" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies or moves source items to destination.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>targets</strong> &#8211; List of source items.</li>
+<li><strong>dst</strong> &#8211; Hash of destination</li>
+<li><strong>cut</strong> &#8211; True=Move (i.e. remove source items after copy);
+False=Copy</li>
+<li><strong>mimes</strong> &#8211; Purpose?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.cmd_rename">
+<tt class="descname">cmd_rename</tt><big>(</big><em>target</em>, <em>name</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.cmd_rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renames an item.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>target</strong> &#8211; Hash of item to rename</li>
+<li><strong>name</strong> &#8211; New name</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.cmd_rm">
+<tt class="descname">cmd_rm</tt><big>(</big><em>targets</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.cmd_rm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes items.</p>
+<p>Only empty diresctories will be removed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>targets</strong> &#8211; List of items.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.cmd_tree_stats">
+<tt class="descname">cmd_tree_stats</tt><big>(</big><em>target</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.cmd_tree_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns tree of subdirs of requested directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>target</strong> &#8211; Hash of directory</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dict(tree=list(...))</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.cmd_upload">
+<tt class="descname">cmd_upload</tt><big>(</big><em>target</em>, <em>upload</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.cmd_upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uploads one or more files.</p>
+<p><tt class="docutils literal"><span class="pre">upload</span></tt> is a list of file objects, with attributes <tt class="docutils literal"><span class="pre">filename</span></tt> and <tt class="docutils literal"><span class="pre">file</span></tt>.
+E.g. if you upload files in Pyramid, those are of type <tt class="docutils literal"><span class="pre">cgi.FieldStorage</span></tt>.
+<tt class="docutils literal"><span class="pre">file</span></tt> is a file-like object.</p>
+<p>If you upload several files, the process terminates at the first error.
+<a class="reference internal" href="#pym_elfinder.finder.Finder.upload_errors" title="pym_elfinder.finder.Finder.upload_errors"><tt class="xref py py-attr docutils literal"><span class="pre">upload_errors</span></tt></a> then contains a list of the occurred exceptions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>target</strong> &#8211; Hash of destination directory.</li>
+<li><strong>upload</strong> &#8211; List of file objects</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.command_args">
+<tt class="descname">command_args</tt><big>(</big><em>cmd</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.command_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns arguments info for given command.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cmd</strong> &#8211; The command.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dict; keys are arguments, values tell whether argument is
+required (True) or not (False). None if command does not
+exist.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.command_exists">
+<tt class="descname">command_exists</tt><big>(</big><em>cmd</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.command_exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks that command exists.</p>
+<p>A command exists if it is listed in <tt class="docutils literal"><span class="pre">Finder.COMMANDS</span></tt>, and
+the finder instance has a callable attribute for it (&#8216;<a href="#id1"><span class="problematic" id="id2">cmd_</span></a>&#8216; + cmd).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True/False</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.mount_volumes">
+<tt class="descname">mount_volumes</tt><big>(</big><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.mount_volumes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.run">
+<tt class="descname">run</tt><big>(</big><em>cmd</em>, <em>cmd_args</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.finder.Finder.run_command">
+<tt class="descname">run_command</tt><big>(</big><em>cmd</em>, <em>cmd_args</em><big>)</big><a class="headerlink" href="#pym_elfinder.finder.Finder.run_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks and runs given command and returns result dict.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.finder.Finder.COMMANDS">
+<tt class="descname">COMMANDS</tt><em class="property"> = {'rename': {'target': True, 'mimes': False, 'name': True}, 'netmount': {'alias': False, 'host': True, 'protocol': True, 'user': True, 'pass': True, 'path': False, 'port': False, 'options': False}, 'file': {'download': False, 'request': False, 'target': True}, 'extract': {'target': True, 'mimes': False}, 'archive': {'type_': True, 'targets': True, 'mimes': False}, 'size': {'targets': True}, 'mkfile': {'target': True, 'mimes': False, 'name': True}, 'open': {'init': False, 'tree': False, 'target': False, 'mimes': False}, 'mkdir': {'target': True, 'name': True}, 'tmb': {'targets': True}, 'duplicate': {'targets': True}, 'parents': {'target': True}, 'ls': {'__func__': 'ls_hash', 'target': True, 'mimes': False}, 'rm': {'targets': True}, 'get': {'target': True}, 'put': {'content': '', 'target': True, 'mimes': False}, 'paste': {'dst': True, 'cut': False, 'targets': True, 'mimes': False}, 'resize': {'target': True, 'degree': False, 'height': True, 'width': True, 'mode': False, 'y': False, 'x': False}, 'info': {'targets': True, 'options': False}, 'dim': {'target': True}, 'search': {'q': True, 'mimes': False}, 'tree': {'__func__': 'tree_stats', 'target': True}, 'upload': {'html': False, 'target': True, 'mimes': False, 'upload': True}}</em><a class="headerlink" href="#pym_elfinder.finder.Finder.COMMANDS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.finder.Finder.cache">
+<tt class="descname">cache</tt><a class="headerlink" href="#pym_elfinder.finder.Finder.cache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.finder.Finder.debug">
+<tt class="descname">debug</tt><em class="property"> = None</em><a class="headerlink" href="#pym_elfinder.finder.Finder.debug" title="Permalink to this definition">¶</a></dt>
+<dd><p>Debug mode.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.finder.Finder.default_volume">
+<tt class="descname">default_volume</tt><em class="property"> = None</em><a class="headerlink" href="#pym_elfinder.finder.Finder.default_volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default volume.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.finder.Finder.exception">
+<tt class="descname">exception</tt><a class="headerlink" href="#pym_elfinder.finder.Finder.exception" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.finder.Finder.headers">
+<tt class="descname">headers</tt><a class="headerlink" href="#pym_elfinder.finder.Finder.headers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.finder.Finder.mount_errors">
+<tt class="descname">mount_errors</tt><em class="property"> = None</em><a class="headerlink" href="#pym_elfinder.finder.Finder.mount_errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of exceptions that may have occured during mounting the volumes.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.finder.Finder.respond_exceptions">
+<tt class="descname">respond_exceptions</tt><em class="property"> = None</em><a class="headerlink" href="#pym_elfinder.finder.Finder.respond_exceptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tells whether messages of nested exceptions are sent to client or not.</p>
+<p>Nested exceptions may be OSError, and displaying them in the client
+exposes full path information!</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.finder.Finder.response">
+<tt class="descname">response</tt><a class="headerlink" href="#pym_elfinder.finder.Finder.response" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.finder.Finder.upload_errors">
+<tt class="descname">upload_errors</tt><em class="property"> = None</em><a class="headerlink" href="#pym_elfinder.finder.Finder.upload_errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exception that occured during upload.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.finder.Finder.volumes">
+<tt class="descname">volumes</tt><em class="property"> = None</em><a class="headerlink" href="#pym_elfinder.finder.Finder.volumes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dict of mounted volumes, key is volume ID.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../pym_elfinder.html"
+                        title="previous chapter">pym_elfinder</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../pym_elfinder/volume/volumedriver.html"
+                        title="next chapter">pym_elfinder.volume.volumedriver</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/api/pym_elfinder/finder.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../pym_elfinder/volume/volumedriver.html" title="pym_elfinder.volume.volumedriver"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../pym_elfinder.html" title="pym_elfinder"
+             >previous</a> |</li>
+        <li><a href="../../index.html">Pym-elFinder 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Dirk Makowski.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

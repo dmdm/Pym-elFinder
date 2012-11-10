@@ -144,14 +144,24 @@ class Driver(VolumeDriver):
         stat['locked'] = False
         stat['hidden'] = False
         return stat
+
+    def _update_quota(self):
+        top = self._root_path
+        self._used_size = 0
+        for root, dirs, files in os.walk(top):
+            self._used_size += sum(
+                os.path.getsize(os.path.join(root, name)) for name in files)
+        return self._used_size
     
     def _has_subdirs(self, path):
         """
         Returns True if path is dir and has at least one child directory.
         """
+        #if 'some_dir' in path:
+        #    import ipdb; ipdb.set_trace()
         for entry in os.listdir(path):
             p = path + self._sep + entry
-            if os.path.isdir(p) and not self.acl_perm(path=p, name='hidden'):
+            if os.path.isdir(p) and not self.acl_perm(path=p, perm_name='hidden'):
                 return True
         return False
 
@@ -167,19 +177,19 @@ class Driver(VolumeDriver):
         prev_root = ''
         depth_cnt = 0
         stats = []
-        try:
-            exclude = list(exclude)
-        except TypeError:
+        if not exclude:
             exclude = []
+        elif isinstance(exclude, str):
+            exclude = [ exclude ]
         for root, dirs, files in os.walk(path):
-            if root in exclude:
-                continue
             if prev_root != root:
                 prev_root = root
                 depth_cnt += 1
                 if depth_cnt > depth:
                     break
             for d in dirs:
+                if self._joinpath(root, d) in exclude:
+                    continue
                 stats.append( self.stat(os.path.join(root, d)) )
         return stats
 
@@ -246,17 +256,71 @@ class Driver(VolumeDriver):
             return self._normpath(self._root_path
                 + self._sep + atarget[len(self._root_realpath) + len(self._sep):])
 
-    def _fopen(self, path, mode='rb'):
+    def _file(self, path):
         """
-        Opens path as file and returns file pointer.
+        Returns file-like object for given path.
+
+        File is opened in binary mode for reading.
         """
-        return open(path, mode)
-    
-    def _fclose(self, fp, **kwargs):
+        try:
+            fd = open(path, 'rb')
+        except (OSError, IOError) as e:
+            raise exc.FinderError(e)
+        return fd
+
+    def _get_content(self, path, encoding=None):
         """
-        Closes opened file.
+        Returns content of file.
+
+        If ``encoding`` is None, opens the file in binary mode and returns a
+        bytes string.
+
+        If ``encoding`` is set, opens the file in text mode and uses the given
+        encoding to transform the content into a unicode string.
+
+        :param path: Path to file
+        :param encoding: Encoding to use for text files
+        :returns: File content as bytes (binary mode) or str (text mode)
         """
-        return fp.close()
+        mode = 'rt' if encoding else 'rb'
+        try:
+            with open(path, mode, encoding=encoding) as fd:
+                s = fd.read()
+        except (OSError, IOError) as e:
+            raise exc.FinderError(exc.ERROR_OPEN, e)
+        return s
+
+    def _put_content(self, path, content, encoding=None):
+        """
+        Writes new content into a file
+
+        If ``encoding`` is None, opens the file in binary mode. If ``encoding``
+        is set, opens the file in text mode and uses the given encoding to
+        transform the unicode content into encoded byte string.
+
+        :param path: Path of file that will be changed
+        :param content: New content
+        :param encoding: Encoding to use for text files
+        :returns: Path of changed file
+        """
+        flags = os.O_WRONLY | os.O_EXCL | os.O_TRUNC
+        if encoding:
+            bytes_ = content.encode(encoding)
+        else:
+            flags |= os.O_BINARY
+            bytes_ = content
+        try:
+            fd = os.open(path, flags)
+            try:
+                os.write(fd, bytes_)
+            except (OSError, IOError) as e:
+                raise
+            finally:
+                os.close(fd)
+        except (OSError, IOError) as e:
+            raise exc.FinderError(exc.ERROR_SAVE, e)
+        return path
+
     
     #********************  file/dir manipulations *************************#
     
@@ -353,70 +417,87 @@ class Driver(VolumeDriver):
 ###        os.rmdir(path)
 ###        return path
 
-    def _save(self, fp, dir_, name, mime, **kwargs):
+    def _save_uploaded(self, fd, dst_path, filename):
         """
-        Create new file and write into it from file pointer.
-        Return new file path or False on error.
-        """
-        path = '%s%s%s' % (dir_, self._sep, name)
-        target = open(path, 'wb')
-        
-        read = fp.read(8192)
-        while read:
-            target.write(read)
-            read = fp.read(8192)
+        Save the uploaded file object and return its new path.
 
-        target.close()
-        os.chmod(path, self._options['fileMode'])
-        
-        return path
-    
-    def _save_uploaded(self, uploaded_file, dir_, name, **kwargs):
-        """
-        Save the django UploadedFile object and return its new path
-        """
-        raise NotImplementedError()
-    
-    def _getContents(self, path):
-        """
-        Get file contents
-        """
-        return open(path).read()
+        :param fd: File descriptor of uploaded file
+        :param dst_path: Path of destination directory
+        :param filename: Basename of uploaded file
+        :returns: Path to uploaded file
 
-    def _filePutContents(self, path, content):
-        """
-        Write a string to a file.
-        """
-        f = open(path, 'w')
-        f.write(content)
-        f.close()
+        Test code to learn nested try..except..finally constructs:
 
-    def _checkArchivers(self):
-        """
-        Detect available archivers
-        """
-        raise NotImplementedError()
+        .. code-block:: python
 
-    def _archive(self, dir_, files, name, arc):
-        """
-        Create archive and return its path
-        """
-        raise NotImplementedError()
+            class Ex(Exception):
+                pass
 
-    def _unpack(self, path, arc):
-        """
-        Unpack archive
-        """
-        raise NotImplementedError()
+            class Ex2(Exception):
+                pass
 
-    def _findSymlinks(self, path):
-        """
-        Recursive symlinks search
-        """
-        raise NotImplementedError()
+            def open_fd():
+                print("FD opened")
 
-    def _extract(self, path, arc):
+            def open_dst_fd():
+                #raise Ex("ERROR on open DST FD")
+                print("DST FD opened")
+
+            def copy():
+                raise Ex("ERROR on copy")
+                print("copy")
+
+            def close_dst_fd():
+                print("DST FD closed")
+
+            def close_fd():
+                print("FD closed")
+
+            def two():
+                open_fd()
+                try:
+                    open_dst_fd()
+                    try:
+                        copy()
+                    except Ex as e:
+                        print("INNER ERROR:", e)
+                        raise Ex2(e)
+                    finally:
+                        close_dst_fd()
+                except Ex as e:
+                    print("OUTER ERROR:", e)
+                    raise Ex2(e)
+                finally:
+                    close_fd()
+
+            two()
         """
-        Extract files from archive
-        """
-        raise NotImplementedError()
+        dst_file_path = self._joinpath(dst_path, filename)
+        try:
+            dst_fd = open(dst_file_path, 'wb')
+            try:
+                shutil.copyfileobj(fd, dst_fd)
+            # copyfileobj may raise several exceptions, so catch them all.
+            # E.g. - UnsupportedOperation if src is not readable,
+            #      - AttributeError if args are of wrong type, e.g.
+            #        have no attr "read()"
+            #      - etc
+            except Exception as e:
+                raise exc.FinderError(exc.ERROR_UPLOAD, e)
+            finally:
+                # Copy failed, but certainly close destination file
+                dst_fd.close()
+        # Catch error on opening dst fd
+        except (OSError, IOError) as e:
+            raise exc.FinderError(exc.ERROR_UPLOAD, e)
+        finally:
+            # Under all circumstances close the uploaded file
+            fd.close()
+        return dst_file_path
+
+    def _rename(self, src, dst):
+        try:
+            os.rename(src, dst)
+        except OSError as e:
+            raise exc.FinderError(exc.ERROR_RENAME, e)
+        return dst

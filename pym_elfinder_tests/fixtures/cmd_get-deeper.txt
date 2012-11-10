@@ -1,6 +1,0 @@
-_=1349286472964
-answer=42
-cmd=get
-target=l1_c29tZV9kaXIvZGVlcGVyLnR4dA
-
-{"content":"This is file \"deeper.txt\" in \"some_dir\".\nfdgsdfgsdfgd","debug":{"connector":"php","phpver":"5.4.4-7","time":0.035008907318115,"memory":"1543Kb \/ 1513Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}

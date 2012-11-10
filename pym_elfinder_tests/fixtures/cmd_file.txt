@@ -1,6 +1,6 @@
-answer=42
+# Response here is not JSON, but the streamed file
+# Must check HTTP headers!
 cmd=file
-download=1
 target=l1_c29tZV9kaXIvZGVlcGVyMi50eHQ
 
-
+{}

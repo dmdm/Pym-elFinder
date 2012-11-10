@@ -1,0 +1,576 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pym_elfinder.volume.volumedriver &mdash; Pym-elFinder 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Pym-elFinder 0.0.1 documentation" href="../../../index.html" />
+    <link rel="next" title="pym_elfinder.volume.localfilesystem" href="../volume/localfilesystem.html" />
+    <link rel="prev" title="pym_elfinder.finder" href="../../pym_elfinder/finder.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../volume/localfilesystem.html" title="pym_elfinder.volume.localfilesystem"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../../pym_elfinder/finder.html" title="pym_elfinder.finder"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">Pym-elFinder 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-pym_elfinder.volume.volumedriver">
+<span id="pym-elfinder-volume-volumedriver"></span><h1>pym_elfinder.volume.volumedriver<a class="headerlink" href="#module-pym_elfinder.volume.volumedriver" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver">
+<em class="property">class </em><tt class="descclassname">pym_elfinder.volume.volumedriver.</tt><tt class="descname">VolumeDriver</tt><big>(</big><em>finder</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">builtins.object</span></tt></p>
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.acl_perm">
+<tt class="descname">acl_perm</tt><big>(</big><em>path</em>, <em>perm_name</em>, <em>val=None</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.acl_perm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether item has requested permission.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>path</strong> &#8211; Path of dir or file</li>
+<li><strong>name</strong> &#8211; Name of permission</li>
+<li><strong>val</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.check_command">
+<tt class="descname">check_command</tt><big>(</big><em>cmd</em>, <em>exc_args=None</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.check_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks that command may be executed.</p>
+<p>At the moment, only checks that command is not disabled in options.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises :</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">exceptions.FinderAccessDenied</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.check_name">
+<tt class="descname">check_name</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.check_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks that given name conforms to a certain policy.</p>
+<p>Policy is set in options as either regular expression or callable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises :</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">exceptions.FinderError</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.copy">
+<tt class="descname">copy</tt><big>(</big><em>src_path</em>, <em>dst_path</em>, <em>name</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies file or directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Path to the newly created file or directory.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.debug_info">
+<tt class="descname">debug_info</tt><big>(</big><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.debug_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns debug info for client.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.decode">
+<tt class="descname">decode</tt><big>(</big><em>hash_</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes path from hash.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.decrypt">
+<tt class="descname">decrypt</tt><big>(</big><em>hash_</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.decrypt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns uncrypted path.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Implement path decryption</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.default_hash">
+<tt class="descname">default_hash</tt><big>(</big><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.default_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns hash of default path.</p>
+<p>Default path is either <tt class="docutils literal"><span class="pre">root_path</span></tt> or <cite>start_path`</cite>. The latter is not
+implemented yet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.duplicate">
+<tt class="descname">duplicate</tt><big>(</big><em>hash_</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.duplicate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create copy of item.</p>
+<p>Name of copy will be original name suffixed with &#8220;(copy #)&#8221;, where &#8220;#&#8221;
+is a running number.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.encode">
+<tt class="descname">encode</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes path into hash.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.encrypt">
+<tt class="descname">encrypt</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.encrypt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns encrypted path.</p>
+<div class="admonition-todo admonition" id="index-1">
+<p class="first admonition-title">Todo</p>
+<p class="last">Implement path encryption</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.file">
+<tt class="descname">file</tt><big>(</big><em>target</em>, <em>download=False</em>, <em>request=False</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.find_child_by_perm">
+<tt class="descname">find_child_by_perm</tt><big>(</big><em>path</em>, <em>perm</em>, <em>val=None</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.find_child_by_perm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns nearest child (or self) that has given permission.</p>
+<p>Checks whether given path or one of its children has that permission
+set. If <tt class="docutils literal"><span class="pre">val</span></tt> is given, permission must have this value, if <tt class="docutils literal"><span class="pre">val</span></tt>
+is omitted, just the presence of the permission is checked.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> &#8211; Path of item where search starts</li>
+<li><strong>perm</strong> &#8211; Name of permission</li>
+<li><strong>val</strong> &#8211; A permission value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Path of found item, or None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.get_open_init_options">
+<tt class="descname">get_open_init_options</tt><big>(</big><em>hash_</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.get_open_init_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return volume options required by client on command open-init</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.is_cmd_disabled">
+<tt class="descname">is_cmd_disabled</tt><big>(</big><em>cmd</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.is_cmd_disabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if command is disabled by options.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.is_hidden">
+<tt class="descname">is_hidden</tt><big>(</big><em>stat=None</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.is_hidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if item is hidden.</p>
+<p>Item is given as <tt class="docutils literal"><span class="pre">stat</span></tt>. If left out, returns
+hiddenness of volume.</p>
+<p>If attribute &#8216;hidden&#8217; is missing, returns False.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.is_locked">
+<tt class="descname">is_locked</tt><big>(</big><em>stat=None</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.is_locked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if item is locked.</p>
+<p>Item is given as <tt class="docutils literal"><span class="pre">stat</span></tt>. If left out, returns
+lockedness of volume.</p>
+<p>If attribute &#8216;locked&#8217; is missing, returns True.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.is_readable">
+<tt class="descname">is_readable</tt><big>(</big><em>stat=None</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.is_readable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if item is readable.</p>
+<p>Item is given as <tt class="docutils literal"><span class="pre">stat</span></tt>. If left out, returns
+readability of volume.</p>
+<p>If attribute &#8216;read&#8217; is missing, returns False.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.is_same_type">
+<tt class="descname">is_same_type</tt><big>(</big><em>mime1</em>, <em>mime2</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.is_same_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if both args are directories or both are files.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.is_writeable">
+<tt class="descname">is_writeable</tt><big>(</big><em>stat=None</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.is_writeable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if item is writeable.</p>
+<p>Item is given as <tt class="docutils literal"><span class="pre">stat</span></tt>. If left out, returns
+writeability of volume.</p>
+<p>If attribute &#8216;write&#8217; is missing, returns False.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.ls_names_hash">
+<tt class="descname">ls_names_hash</tt><big>(</big><em>hash_</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.ls_names_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of names of items inside given hash.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.ls_stats">
+<tt class="descname">ls_stats</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.ls_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of stats of items in given path.</p>
+<p>Items that have permission <tt class="docutils literal"><span class="pre">hidden</span></tt> set or whose mime-type is
+forbidden, are not listed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.ls_stats_hash">
+<tt class="descname">ls_stats_hash</tt><big>(</big><em>hash_</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.ls_stats_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of stats of items in given hash.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.mime_accepted">
+<tt class="descname">mime_accepted</tt><big>(</big><em>mime</em>, <em>mimes=None</em>, <em>empty=True</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.mime_accepted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if mime is in required mimes list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.mimetype">
+<tt class="descname">mimetype</tt><big>(</big><em>path</em>, <em>name=''</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.mimetype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns mimetype of given path.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.mimetype_internal_detect">
+<tt class="descname">mimetype_internal_detect</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.mimetype_internal_detect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detect file mimetype using &#8220;internal&#8221; method</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.mkdir">
+<tt class="descname">mkdir</tt><big>(</big><em>cur</em>, <em>name</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.mkdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates directory and returns its stat</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cur</strong> &#8211; Hash of current directory</li>
+<li><strong>name</strong> &#8211; Name of subdirectory to create</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.mkfile">
+<tt class="descname">mkfile</tt><big>(</big><em>cur</em>, <em>name</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.mkfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates file and returns its stat</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cur</strong> &#8211; Hash of current directory</li>
+<li><strong>name</strong> &#8211; Name of file to create</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.mount">
+<tt class="descname">mount</tt><big>(</big><em>opts</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.mount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.move">
+<tt class="descname">move</tt><big>(</big><em>src_path</em>, <em>dst_path</em>, <em>name</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves file or directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Destination path.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.name">
+<tt class="descname">name</tt><big>(</big><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.paste">
+<tt class="descname">paste</tt><big>(</big><em>src_vol</em>, <em>src</em>, <em>dst</em>, <em>cut=False</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.paste" title="Permalink to this definition">¶</a></dt>
+<dd><p>Paste file to destination</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>src_vol</strong> &#8211; Source volume</li>
+<li><strong>src</strong> &#8211; Hash of source dir/file</li>
+<li><strong>dst</strong> &#8211; Hash of destination dir/file</li>
+<li><strong>cut</strong> &#8211; True=Move (Source is deleted), False=Copy</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.remove">
+<tt class="descname">remove</tt><big>(</big><em>hash_</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes item.</p>
+<p>Only an empty directory gets removed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>hash</strong> &#8211; Hash of item to remove</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Full path of removed item</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.rename">
+<tt class="descname">rename</tt><big>(</big><em>target</em>, <em>name</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renames item.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>target</strong> &#8211; Hash of item to rename</li>
+<li><strong>name</strong> &#8211; New name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">2-tuple:
+[0] List of stats of added items,
+[1] List of hashes of removed items</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.root_hash">
+<tt class="descname">root_hash</tt><big>(</big><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.root_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns hash of root path.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.stat">
+<tt class="descname">stat</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.stat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns info for given path.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.stat_dir">
+<tt class="descname">stat_dir</tt><big>(</big><em>hash_</em>, <em>resolveLink=False</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.stat_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns folder info.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.stat_file">
+<tt class="descname">stat_file</tt><big>(</big><em>hash_</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.stat_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns file info.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.tree_stats">
+<tt class="descname">tree_stats</tt><big>(</big><em>hash_=''</em>, <em>depth=0</em>, <em>exclude=None</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.tree_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return subfolders for required folder or False on error</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.umount">
+<tt class="descname">umount</tt><big>(</big><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.umount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.unique_name">
+<tt class="descname">unique_name</tt><big>(</big><em>path</em>, <em>name</em>, <em>suffix=' (copy #)'</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.unique_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a unique new name for given item.</p>
+<p>If a hashmark (&#8216;#&#8217;) is present in <tt class="docutils literal"><span class="pre">suffix</span></tt>, it is replaced by a
+running number.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.upload">
+<tt class="descname">upload</tt><big>(</big><em>fo</em>, <em>dst</em><big>)</big><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores uploaded file.</p>
+<p>Object of uploaded file must have properties <tt class="docutils literal"><span class="pre">filename</span></tt> and
+<tt class="docutils literal"><span class="pre">file</span></tt>, which is a file descriptor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fo</strong> &#8211; Object of uploaded file</li>
+<li><strong>dst</strong> &#8211; Hash of destination directory</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.DEFAULT_OPTIONS">
+<tt class="descname">DEFAULT_OPTIONS</tt><em class="property"> = {'uploadDeny': [], 'tmbURL': '', 'startPath': '', 'disabled_cmds': [], 'uploadOrder': ['deny', 'allow'], 'id': '', 'tmbSize': 48, 'copyJoin': True, 'tmbPathMode': 511, 'dateFormat': 'j M Y H:i', 'onlyMimes': [], 'copyTo': True, 'uploadAllow': [], 'access_policy': None, 'name_policy': '^[^_.]', 'tree_depth': 1, 'URL': '', 'tmbPath': '.tmb', 'tmbCrop': True, 'archivers': {}, 'copyOverwrite': True, 'timeFormat': 'H:i', 'path': '', 'tmbBgColor': '#ffffff', 'default_ace': {'read': True, 'write': True}, 'uploadOverwrite': True, 'checkSubfolders': True, 'acl': [], 'separator': '/', 'copyFrom': True, 'archiveMimes': []}</em><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.DEFAULT_OPTIONS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.DRIVER_ID">
+<tt class="descname">DRIVER_ID</tt><em class="property"> = 'a'</em><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.DRIVER_ID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Driver ID.</p>
+<p>Must conform to /^[a-z][a-z0-9]*$/. Used as part of volume ID.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.driver_id">
+<tt class="descname">driver_id</tt><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.driver_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Driver ID. Used as part of volume ID.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.is_mounted">
+<tt class="descname">is_mounted</tt><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.is_mounted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tells whether this volume is properly mounted or not.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pym_elfinder.volume.volumedriver.VolumeDriver.volume_id">
+<tt class="descname">volume_id</tt><a class="headerlink" href="#pym_elfinder.volume.volumedriver.VolumeDriver.volume_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Volume ID. Used as prefix of file hashes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../../pym_elfinder/finder.html"
+                        title="previous chapter">pym_elfinder.finder</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../volume/localfilesystem.html"
+                        title="next chapter">pym_elfinder.volume.localfilesystem</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/pym_elfinder/volume/volumedriver.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../volume/localfilesystem.html" title="pym_elfinder.volume.localfilesystem"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../../pym_elfinder/finder.html" title="pym_elfinder.finder"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">Pym-elFinder 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Dirk Makowski.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

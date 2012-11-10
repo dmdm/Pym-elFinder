@@ -1,7 +1,19 @@
-_=1349690638836
+# Rename "deeper2-foo.txt" to "deeper2-bar.txt"
+_=1350154553662
 answer=42
 cmd=rename
-name=deeper2-2.txt
-target=l1_c29tZV9kaXIvZGVlcGVyMiBjb3B5IDEudHh0
+name=deeper2-bar.txt
+target=l1_c29tZV9kaXIvZGVlcGVyMi1mb28udHh0
 
-{"added":[{"mime":"text\/plain","ts":1349690554,"read":1,"write":1,"size":62,"hash":"l1_c29tZV9kaXIvZGVlcGVyMi0yLnR4dA","name":"deeper2-2.txt","phash":"l1_c29tZV9kaXI"}],"removed":["l1_c29tZV9kaXIvZGVlcGVyMiBjb3B5IDEudHh0"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.04041600227356,"memory":"1719Kb \/ 1594Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
+{"added":[{"mime":"text\/plain","ts":1350150252,"read":1,"write":1,"size":0,"hash":"l1_c29tZV9kaXIvZGVlcGVyMi1iYXIudHh0","name":"deeper2-bar.txt","phash":"l1_c29tZV9kaXI"}],"removed":["l1_c29tZV9kaXIvZGVlcGVyMi1mb28udHh0"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.038751840591431,"memory":"1720Kb \/ 1599Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
+
+
+# Rename "deeper2-foo.txt" to "deeper2.txt", which exists.
+_=1350154553662
+answer=42
+cmd=rename
+name=deeper2.txt
+target=l1_c29tZV9kaXIvZGVlcGVyMi1mb28udHh0
+
+# No response because of exception
+{}

@@ -1,0 +1,47 @@
+# OPEN INIT
+_=1349286014187
+answer=42
+cmd=open
+init=1
+target=
+tree=1
+
+{"cwd":{"mime":"directory","ts":1349277815,"read":1,"write":1,"size":0,"hash":"l1_Lw","volumeid":"l1_","name":"files","locked":1,"dirs":1},"options":{"path":"files","url":"","tmbUrl":"","disabled":["extract"],"separator":"\/","copyOverwrite":1,"archivers":{"create":["application\/x-tar","application\/x-gzip","application\/x-bzip2","application\/zip","application\/x-rar","application\/x-7z-compressed"],"extract":[]}},"files":[{"mime":"directory","ts":1349277815,"read":1,"write":1,"size":0,"hash":"l1_Lw","volumeid":"l1_","name":"files","locked":1,"dirs":1},{"mime":"directory","ts":1349281653,"read":1,"write":1,"size":0,"hash":"l1_c29tZV9kaXI","name":"some_dir","phash":"l1_Lw"},{"mime":"unknown","ts":1349277814,"read":1,"write":1,"size":528,"hash":"l1_UkVBRE1F","name":"README","phash":"l1_Lw"}],"api":"2.0","uplMaxSize":"2M","netDrivers":["ftp"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.02778697013855,"memory":"1542Kb \/ 1521Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
+
+
+
+# Reload root:
+# On reload, command "open init target tree" is sent.
+# Here, target is root.
+_=1350378840883
+answer=42
+cmd=open
+init=1
+target=l1_Lw
+tree=1
+
+{"cwd":{"mime":"directory","ts":1350378654,"read":1,"write":1,"size":0,"hash":"l1_Lw","volumeid":"l1_","name":"files","locked":1,"dirs":1},"options":{"path":"files","url":"","tmbUrl":"","disabled":[],"separator":"\/","copyOverwrite":1,"archivers":{"create":["application\/x-tar","application\/x-gzip","application\/x-bzip2","application\/zip","application\/x-rar","application\/x-7z-compressed"],"extract":["application\/x-tar","application\/x-gzip","application\/x-bzip2","application\/zip","application\/x-rar","application\/x-7z-compressed"]}},"files":[{"mime":"directory","ts":1350378654,"read":1,"write":1,"size":0,"hash":"l1_Lw","volumeid":"l1_","name":"files","locked":1,"dirs":1},{"mime":"directory","ts":1350334384,"read":1,"write":1,"size":0,"hash":"l1_c29tZV9kaXI","name":"some_dir","phash":"l1_Lw"},{"mime":"unknown","ts":1350062564,"read":1,"write":1,"size":528,"hash":"l1_UkVBRE1F","name":"README","phash":"l1_Lw"}],"api":"2.0","uplMaxSize":"2M","netDrivers":["ftp"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.042089939117432,"memory":"1715Kb \/ 1601Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
+
+
+
+# Open "some_dir"
+_=1350381932529
+answer=42
+cmd=open
+target=l1_c29tZV9kaXI
+
+{"cwd":{"mime":"directory","ts":1350381407,"read":1,"write":1,"size":0,"hash":"l1_c29tZV9kaXI","name":"some_dir","phash":"l1_Lw"},"options":{"path":"files\/some_dir","url":"","tmbUrl":"","disabled":[],"separator":"\/","copyOverwrite":1,"archivers":{"create":["application\/x-tar","application\/x-gzip","application\/x-bzip2","application\/zip","application\/x-rar","application\/x-7z-compressed"],"extract":["application\/x-tar","application\/x-gzip","application\/x-bzip2","application\/zip","application\/x-rar","application\/x-7z-compressed"]}},"files":[{"mime":"text\/plain","ts":1350334333,"read":1,"write":1,"size":62,"hash":"l1_c29tZV9kaXIvZGVlcGVyMi50eHQ","name":"deeper2.txt","phash":"l1_c29tZV9kaXI"},{"mime":"image\/jpeg","ts":1349286958,"read":1,"write":1,"size":76603,"hash":"l1_c29tZV9kaXIvaW1hZ2UuanBn","name":"image.jpg","phash":"l1_c29tZV9kaXI"}],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.043848037719727,"memory":"1714Kb \/ 1601Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
+
+
+
+# Reload "some_dir"
+# Additionally to the "open" command, a "tree" command is sent. But we cover that in a
+# separate test.
+_=1350381993375
+answer=42
+cmd=open
+init=1
+target=l1_c29tZV9kaXI
+tree=1
+
+{"cwd":{"mime":"directory","ts":1350381407,"read":1,"write":1,"size":0,"hash":"l1_c29tZV9kaXI","name":"some_dir","phash":"l1_Lw"},"options":{"path":"files\/some_dir","url":"","tmbUrl":"","disabled":[],"separator":"\/","copyOverwrite":1,"archivers":{"create":["application\/x-tar","application\/x-gzip","application\/x-bzip2","application\/zip","application\/x-rar","application\/x-7z-compressed"],"extract":["application\/x-tar","application\/x-gzip","application\/x-bzip2","application\/zip","application\/x-rar","application\/x-7z-compressed"]}},"files":[{"mime":"directory","ts":1350378654,"read":1,"write":1,"size":0,"hash":"l1_Lw","volumeid":"l1_","name":"files","locked":1,"dirs":1},{"mime":"text\/plain","ts":1350334333,"read":1,"write":1,"size":62,"hash":"l1_c29tZV9kaXIvZGVlcGVyMi50eHQ","name":"deeper2.txt","phash":"l1_c29tZV9kaXI"},{"mime":"image\/jpeg","ts":1349286958,"read":1,"write":1,"size":76603,"hash":"l1_c29tZV9kaXIvaW1hZ2UuanBn","name":"image.jpg","phash":"l1_c29tZV9kaXI"}],"api":"2.0","uplMaxSize":"2M","netDrivers":["ftp"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.048833131790161,"memory":"1715Kb \/ 1605Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}

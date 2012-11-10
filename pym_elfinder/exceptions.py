@@ -61,7 +61,11 @@ PYM_ERROR_RESIZE_IMAGE_FAILED = 'Could not resize image'
 PYM_ERROR_INVALID_NAME_POLICY = 'Name policy is invalid'
 PYM_ERROR_UNIQUE_NAME = 'Failed to create unique name'
 PYM_ERROR_INVALID_PATH = 'Invalid path'
+PYM_ERROR_QUOTA_EXCEEDED = 'Quota exceeded ({0:,d} bytes free)'
 
+HTTP_INTERNAL_SERVER_ERROR = 'HTTP/1.x 500 Internal Server Error'
+HTTP_ACCESS_DENIED         = 'HTTP/1.x 403 Access Denied';
+HTTP_NOT_FOUND             = 'HTTP/1.x 404 Not Found';
 
 class FinderError(Exception):
     """
@@ -82,6 +86,16 @@ class FinderError(Exception):
     def __init__(self, *args, **kw):
         super().__init__(*args)
         self.kw = kw
+        if 'headers' in kw:
+            self._headers = kw['headers']
+            del kw['headers']
+        else:
+            self._headers = None
+        if 'status' in kw:
+            self._status = kw['status']
+            del kw['status']
+        else:
+            self._status = None
 
     def __getattr__(self, name):
         try:
@@ -122,12 +136,46 @@ class FinderError(Exception):
         return dict(error=errors)
 
     @property
+    def status(self):
+        """Special HTTP status to send as response.
+
+        :returns: String with HTTP status, or None
+        """
+        return self._status
+
+    @status.setter
+    def status(self, v):
+        self._status = v
+
+    @property
     def headers(self):
         """Special HTTP headers to send as response.
 
-        :returns: Dict of HTTP headers or None
+        :returns: Dict of HTTP headers, or None
         """
-        try:
-            return self.kw['headers']
-        except KeyError:
-            return None
+        return self._headers
+
+    @headers.setter
+    def headers(self, v):
+        self._headers = v
+
+
+class FinderAccessDenied(FinderError):
+
+    def __init__(self, *args, **kw):
+        """
+        Sets HTTP status to 403 ACCESS DENIED.
+        """
+        kw2 = dict(status=HTTP_ACCESS_DENIED).update(kw)
+        super().__init__(ERROR_PERM_DENIED, *args, **kw2)
+
+
+class FinderNotFound(FinderError):
+
+    def __init__(self, *args, **kw):
+        """
+        Sets HTTP status to 404 NOT FOUND.
+        """
+        kw2 = dict(status=HTTP_NOT_FOUND).update(kw)
+        super().__init__(ERROR_FILE_NOT_FOUND, *args, **kw2)
+

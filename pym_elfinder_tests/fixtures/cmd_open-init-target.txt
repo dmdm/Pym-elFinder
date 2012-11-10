@@ -1,8 +1,10 @@
-_=1349286264880
+# On reload, command "open init target tree" is sent.
+# Here, target is root.
+_=1350378840883
 answer=42
 cmd=open
 init=1
 target=l1_Lw
 tree=1
 
-{"cwd":{"mime":"directory","ts":1349277815,"read":1,"write":1,"size":0,"hash":"l1_Lw","volumeid":"l1_","name":"files","locked":1,"dirs":1},"options":{"path":"files","url":"","tmbUrl":"","disabled":["extract"],"separator":"\/","copyOverwrite":1,"archivers":{"create":["application\/x-tar","application\/x-gzip","application\/x-bzip2","application\/zip","application\/x-rar","application\/x-7z-compressed"],"extract":[]}},"files":[{"mime":"directory","ts":1349277815,"read":1,"write":1,"size":0,"hash":"l1_Lw","volumeid":"l1_","name":"files","locked":1,"dirs":1},{"mime":"directory","ts":1349281653,"read":1,"write":1,"size":0,"hash":"l1_c29tZV9kaXI","name":"some_dir","phash":"l1_Lw"},{"mime":"unknown","ts":1349277814,"read":1,"write":1,"size":252,"hash":"l1_UkVBRE1F","name":"README","phash":"l1_Lw"}],"api":"2.0","uplMaxSize":"2M","netDrivers":["ftp"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.023226976394653,"memory":"1543Kb \/ 1522Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
+{"cwd":{"mime":"directory","ts":1350378654,"read":1,"write":1,"size":0,"hash":"l1_Lw","volumeid":"l1_","name":"files","locked":1,"dirs":1},"options":{"path":"files","url":"","tmbUrl":"","disabled":[],"separator":"\/","copyOverwrite":1,"archivers":{"create":["application\/x-tar","application\/x-gzip","application\/x-bzip2","application\/zip","application\/x-rar","application\/x-7z-compressed"],"extract":["application\/x-tar","application\/x-gzip","application\/x-bzip2","application\/zip","application\/x-rar","application\/x-7z-compressed"]}},"files":[{"mime":"directory","ts":1350378654,"read":1,"write":1,"size":0,"hash":"l1_Lw","volumeid":"l1_","name":"files","locked":1,"dirs":1},{"mime":"directory","ts":1350334384,"read":1,"write":1,"size":0,"hash":"l1_c29tZV9kaXI","name":"some_dir","phash":"l1_Lw"},{"mime":"unknown","ts":1350062564,"read":1,"write":1,"size":528,"hash":"l1_UkVBRE1F","name":"README","phash":"l1_Lw"}],"api":"2.0","uplMaxSize":"2M","netDrivers":["ftp"],"debug":{"connector":"php","phpver":"5.4.4-7","time":0.042089939117432,"memory":"1715Kb \/ 1601Kb \/ 128M","upload":"","volumes":[{"id":"l1_","name":"localfilesystem","mimeDetect":"internal","imgLib":"gd"}],"mountErrors":[]}}
