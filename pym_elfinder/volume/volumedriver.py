@@ -982,12 +982,14 @@ class VolumeDriver(object):
         """
         mime = self._mimetype(path)
         # Mime may be empty if e.g. the tested file is empty. And an empty
-        # file we create e.g. with our mkfile()
-        if not mime or mime in ['inode/x-empty', 'application/empty']:
-            prev_mime = mime
+        # file we create e.g. with our mkfile().
+        # Force empty files to be of type text/plain. Otherwise elFinder UI
+        # will not display "edit file" context menu.
+        if mime in ['inode/x-empty', 'application/empty']:
+            return 'text/plain'
+        # Mime type could not be determined by volume, so try Python's method
+        if not mime:
             mime = self.mimetype_internal_detect(name if name else path)
-            if not mime:
-                mime = prev_mime
         return mime
 
     def mimetype_internal_detect(self, path):
