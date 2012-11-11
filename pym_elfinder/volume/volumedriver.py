@@ -66,6 +66,19 @@ class VolumeDriver(object):
         # Renamed from "nameValidator"
         self.name_policy = None
         self._archivers = None
+        self._max_size = 0
+        """
+        Quota max size in bytes.
+
+        Is set during mount initialization from volume options.
+        """
+        self._used_size = 0
+        """
+        Quota used size in bytes.
+
+        Call :meth:`update_quota()` to set this value correctly. Is updated by Finder
+        on each command call.
+        """
         # ---[ public attribs ]-------
 
     # ===[ MOUNT ]=======
